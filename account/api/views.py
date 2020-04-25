@@ -130,6 +130,7 @@ def activate(request, uidb64, token):
         return Response(data, status=status.HTTP_200_OK)
 
     else:
+        user.is_active = False
         return Response({'message': 'Activation link is invalid!'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -182,35 +183,66 @@ def is_user_expired(user):
     return True
 
 
-class ObtainAuthTokenView(APIView):
-    authentication_classes = []
-    permission_classes = []
+@api_view(['POST', ])
+@permission_classes([])
+@authentication_classes([])
+def login_api(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    data = {}
+    user = authenticate(username=username, password=password)
     
-    def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        data = {}
-        user = authenticate(username=username, password=password)
+    if user:
+        try:
+            token = Token.objects.get(user=user)
+        except Token.DoesNotExist:
+            token = Token.objects.create(user=user)
+        data['message'] = 'You successfully logged in to your account.'
+        data['token'] = token.key
+        data['username'] = user.username
+        data['email'] = user.email
+        data['first_name'] = user.first_name
+        data['last_name'] = user.last_name
+        data['image'] = get_user_profile_image(user)
+        return Response(data, status=status.HTTP_200_OK)
+    else:
+        data['message'] = 'Wrong username or password'
+        data['sent_un'] = str(username)
+        data['sent_pw'] = str(password)
+        data['user'] = str(user)
+        return Response(data, status.HTTP_400_BAD_REQUEST)
 
-        if user:
-            try:
-                token = Token.objects.get(user=user)
-            except Token.DoesNotExist:
-                token = Token.objects.create(user=user)
-            data['message'] = 'You successfully logged in to your account.'
-            data['token'] = token.key
-            data['username'] = user.username
-            data['email'] = user.email
-            data['first_name'] = user.first_name
-            data['last_name'] = user.last_name
-            data['image'] = get_user_profile_image(user)
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            data['message'] = 'Wrong username or password'
-            data['sent_un'] = str(username)
-            data['sent_pw'] = str(password)
-            data['user'] = str(user)
-            return Response(data, status.HTTP_400_BAD_REQUEST)
+
+
+# class ObtainAuthTokenView(APIView):
+#     authentication_classes = []
+#     permission_classes = []
+    
+#     def post(self, request):
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         data = {}
+#         user = authenticate(username=username, password=password)
+
+#         if user:
+#             try:
+#                 token = Token.objects.get(user=user)
+#             except Token.DoesNotExist:
+#                 token = Token.objects.create(user=user)
+#             data['message'] = 'You successfully logged in to your account.'
+#             data['token'] = token.key
+#             data['username'] = user.username
+#             data['email'] = user.email
+#             data['first_name'] = user.first_name
+#             data['last_name'] = user.last_name
+#             data['image'] = get_user_profile_image(user)
+#             return Response(data, status=status.HTTP_200_OK)
+#         else:
+#             data['message'] = 'Wrong username or password'
+#             data['sent_un'] = str(username)
+#             data['sent_pw'] = str(password)
+#             data['user'] = str(user)
+#             return Response(data, status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])
