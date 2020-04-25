@@ -20,12 +20,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '-2vo3%&22fy&-!aiv#tm%s-7t*d-r!3xq1o^epon@!0m0t6g^t'
+# SECRET_KEY = '-2vo3%&22fy&-!aiv#tm%s-7t*d-r!3xq1o^epon@!0m0t6g^t'
+SECRET_KEY = os.environ.get('SADBOOKSHARE_DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True #os.environ.get('SADBOOKSHARE_DJANGO_DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'sadbookshare.herokuapp.com',
+]
 
 
 # Application definition
@@ -52,8 +55,8 @@ AUTH_USER_MODEL = 'account.User'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'sadbookshare@gmail.com'
-EMAIL_HOST_PASSWORD = 'pzbxabxcrvoftvim'
+EMAIL_HOST_USER = os.environ.get('SADBOOKSHARE_DJANGO_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('SADBOOKSHARE_DJANGO_EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 
 REST_FRAMEWORK = {
@@ -103,8 +106,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bookshare_db',
-        'USER': 'bookshare',
-        'PASSWORD': 'sadbsaa',
+        'USER': os.environ.get('SADBOOKSHARE_DJANGO_DB_USER'),
+        'PASSWORD': os.environ.get('SADBOOKSHARE_DJANGO_DB_PASSWORD'),
         'HOST': 'localhost',
     }
 }
