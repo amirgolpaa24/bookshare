@@ -207,8 +207,8 @@ class ObtainAuthTokenView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data['message'] = 'Wrong username or password'
-            data['sent_un'] = username
-            data['sent_pw'] = password
+            data['sent_un'] = str(username)
+            data['sent_pw'] = str(password)
             data['user'] = str(user)
             return Response(data, status.HTTP_400_BAD_REQUEST)
 
