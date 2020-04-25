@@ -1,0 +1,138 @@
+
+4. API for editing account:		
+	
+	* HTTP "PUT" request
+	* URL = 127.0.0.1:8000/api/account/edit
+	* TOKEN in the header
+	
+	
+	* valid request JSON data: 
+		{
+			'username' : 'uuuuuuu',
+			'first_name' : 'ffffff',
+			'last_name' : 'lllllll'
+		}
+		
+		*** Notice: JSON can have any of the 3 fields above
+			for example, it can only contain 'first_name' field, or any other ...  
+			But, the user can never edit his/her email!
+			If there are other fields in JSON, the server will ignore them! (Only fileds above can be edited, if included)
+			Plus, he/she can edit their 'image' or 'password' by other APIs
+
+
+	* response types:
+
+		4-1. If there is no token in header:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Authentication credentials were not provided."    }
+		
+		4-2. If the token is invalid or wrong:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Invalid token."    }
+		
+		4-3. If none of the fields 'username', 'first_name', or 'last_name' is included:
+			- status code = 400 Bad Request
+			- JSON data = {    "message" : "No changes have been made."    }
+
+		4-4. If any of the editable fields are not valid (like what we checked in registration):
+			- status code = 400 Bad Request
+			- JSON data = {
+					"message" : "invalid fields",
+					"name_of_invalid_fields" : ["error_messages"],
+				}
+				
+				for example - if the rdited username is invalid:	
+					{
+						"message": "invalid fields",
+						"username": [ "Username can only contain alphabets, numbers, '_', or '.' in an accepted manner;\nUsername should be 8 to 30 characters long." ]
+					}
+
+		4-5. If the editing is done successfully:
+			- status code = 200 OK
+			-JSON data = {    "message" : "You have successfully updated your account."    }
+
+
+------------------------------------------------------------------------------------------------------
+
+5. API for changing password:		
+	
+	* HTTP "PUT" request
+	* URL = 127.0.0.1:8000/api/account/change_password
+	* TOKEN in the header
+	
+	
+	* valid request JSON data: 
+		{
+			'old_password' : 'ooooooo',
+			'new_password' : 'nnnnnnnnnnn',
+			'new_password_confirmation' : 'nnnnnnnnnnn'
+		}
+		
+		*** Notice: All of the 3 fields above must be in JSON
+
+
+	* response types:
+
+		5-1. If there is no token in header:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Authentication credentials were not provided."    }
+		
+		5-2. If the token is invalid or wrong:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Invalid token."    }
+		
+		5-3. If any of the fields 'old_password', 'new_password', or 'new_password_confirmation' is NOT included:
+			- status code = 400 Bad Request
+			- JSON data = {    "message" : "The <missing_field> is required!\n..."    }
+
+			for example:
+				{
+					"message": "The old password is required!\nThe new password confirmation is required!"
+				}
+
+		5-4. If all three required fields are there, but the old_password is wrong:
+		 	- status code = 400 Bad Request
+			- JSON data = {    "message": "The old password is wrong!"    }
+
+		5-5. If the old_password is correct, but the NEW passwords are not the same:
+		 	- status code = 400 Bad Request
+			- JSON data = {    "message": "New passwords must match!"    }
+
+		5-6. If everything is all right:
+			- status code = 200 OK
+			- JSON data = {    "message": "You have successfully changed your password."    }
+
+------------------------------------------------------------------------------------------------------
+
+6. API for reseting password (if forgot):		
+	
+	* HTTP "POST" request
+	* URL = 127.0.0.1:8000/api/account/reset_password
+	* TOKEN in the header
+	
+	
+	* valid request JSON data: 
+		{
+			'email' : 'xxxxxx@xxxxx.xxx',
+		}
+		
+		*** Notice: The email must be the email that the user registerd with (and verified)
+
+
+	* response types:
+
+		6-1. If there is no token in header:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Authentication credentials were not provided."    }
+		
+		6-2. If the token is invalid or wrong:
+			- status code = 401 Unauthorized
+			- JSON data = {    "detail" : "Invalid token."    }
+		
+		6-3. If there is no email field in JSON or it's not verified:
+			- status code = 400 Bad Request
+			- JSON data = {    "message" : "This email is not verified in your account!"    }
+		
+		6-4. If the email is correct:
+			- status code = 200 OK
+			- JSON data = {    "message" : "Your password has successfully changed;\nWe sent your new password to your email account."    }

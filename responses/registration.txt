@@ -1,0 +1,39 @@
+1. if the email is not provided:
+    response = {
+        'response': 'Error',
+        'error_message': 'No email was provided!',
+    }
+
+2. if the username is not provided:
+    response = {
+        'response': 'Error',
+        'error_message': 'No username was provided!',
+    }
+
+3. if the email is taken:
+    response = {
+        'response': 'Error',
+        'error_message': 'Sorry, user with this email already exists!',
+    }
+
+4. if the username is taken:
+    response = {
+        'response': 'Error',
+        'error_message': 'Sorry, user with this username already exists!',
+    }
+
+5. if ok:
+    response = {
+        'response' = 'Successfully registered',
+        'token' = token,
+        'email' = email,
+        'username' = username,
+        'first_name' = first_name,
+        'last_name' = last_name,
+    }
+
+6. if serializer is not valid:
+    response = {
+        (serializer errors) # may include username regex errors, or email invalidity errors, or ...
+                            # it's in the form of: {'FIELD': ['ERROR MESSAGES', ...], ...}
+    }
