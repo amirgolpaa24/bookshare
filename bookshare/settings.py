@@ -159,4 +159,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'account/media/')
 MEDIA_URL = '/media/'
 
 
-djnago_heroku.settings(locals())
+django_heroku.settings(locals())
