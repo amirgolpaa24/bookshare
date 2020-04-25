@@ -220,6 +220,10 @@ def api_account_properties_view(request, username):
         except User.DoesNotExist:
             return Response({'message': 'There is no such username!'}, status=status.HTTP_404_NOT_FOUND)
 
+        if not user.is_active:
+            return Response({'message': 'There is no such username!'}, status=status.HTTP_404_NOT_FOUND)
+
+
         requester = request.user
         is_outsider = (user != requester)
 
