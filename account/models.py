@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
@@ -47,11 +49,27 @@ class UserManager(BaseUserManager):
         return user 
 
 
+def validate_persian_username(input_string=''):
+    space_codepoints ='\u0020\u2000-\u200F\u2028-\u202F'
+    persian_alpha_codepoints = '\u0621-\u0628\u062A-\u063A\u0641-\u0642\u0644-\u0648\u064E-\u0651\u0655\u067E\u0686\u0698\u06A9\u06AF\u06BE\u06CC'
+    persian_num_codepoints = '\u06F0-\u06F9'
+    punctuation_marks_codepoints = '\u060C\u061B\u061F\u0640\u066A\u066B\u066C'
+    additional_arabic_characters_codepoints = '\u0629\u0643\u0649-\u064B\u064D\u06D5'
+    arabic_numbers_codepoints = '\u0660-\u0669'
+
+    return persian_alpha_codepoints + additional_arabic_characters_codepoints + punctuation_marks_codepoints + persian_num_codepoints
+    # return re.search('^[\s,'+persian_alpha_codepoints+additional_arabic_characters_codepoints
+    #                     +punctuation_marks_codepoints+
+    #                     persian_num_codepoints+']*$', input_string)
+
+
 class User(AbstractBaseUser):
     first_name =        models.CharField(max_length=30, blank=False, null=False)
     last_name =         models.CharField(max_length=40, blank=False, null=False)
     username =          models.CharField(max_length=30, unique=True, null=False, blank=False, 
-                            validators=[RegexValidator('^(?=.{8,30}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$', message="Username can only contain alphabets, numbers, '_', or '.' in an accepted manner;\nUsername should be 8 to 30 characters long.")])
+                            validators=[RegexValidator('^(?=.{8,30}$)(?![_.])(?!.*[_.]{2})['\
+                                + validate_persian_username() +\
+                                'a-zA-Z0-9._]+(?<![_.])$', message="Username can only contain alphabets, numbers, '_', or '.' in an accepted manner;\nUsername should be 8 to 30 characters long.")])
     email =             models.EmailField(max_length=254, unique=True, blank=False, null=False)
 
     image =             models.ImageField(upload_to='profile_images/', default='./profile_images/default_user_profile_image.png', blank=False, null=False)

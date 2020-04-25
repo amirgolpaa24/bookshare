@@ -207,6 +207,9 @@ class ObtainAuthTokenView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             data['message'] = 'Wrong username or password'
+            data['sent_un'] = username
+            data['sent_pw'] = password
+            data['user'] = str(user)
             return Response(data, status.HTTP_400_BAD_REQUEST)
 
 
@@ -222,7 +225,6 @@ def api_account_properties_view(request, username):
 
         if not user.is_active:
             return Response({'message': 'There is no such username!'}, status=status.HTTP_404_NOT_FOUND)
-
 
         requester = request.user
         is_outsider = (user != requester)
