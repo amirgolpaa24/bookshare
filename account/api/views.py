@@ -27,13 +27,13 @@ from .serializers import (ChangePasswordSerializer, EditedUserSerializer,
 
 
 # messages:
-MSG_NO_EMAIL =                  {'Persian': 'ایمیل ارائه نشده است', 'English': 'No email was provided!'}[MSG_LANGUAGE]
+MSG_NO_EMAIL =                  {'Persian': 'رایانامه ارائه نشده است', 'English': 'No email was provided!'}[MSG_LANGUAGE]
 MSG_NO_USERNAME =               {'Persian': 'نام کاربری ارائه نشده است', 'English': 'No username was provided!'}[MSG_LANGUAGE]
 MSG_NO_FIRSTNAME =              {'Persian': 'نام کوچک ارائه نشده است', 'English': 'No first name was provided!'}[MSG_LANGUAGE]
 MSG_NO_LASTNAME =               {'Persian': 'نام خانوادگی ارائه نشده است', 'English': 'No last name was provided!'}[MSG_LANGUAGE]
 MSG_NO_PASSWORD =               {'Persian': 'رمز عبور ارائه نشده است', 'English': 'No password was provided!'}[MSG_LANGUAGE]
 MSG_NO_PASSWORDCONFIRMATION =   {'Persian': 'تکرار رمز عبور ارائه نشده است', 'English': 'No password confirmation was provided!'}[MSG_LANGUAGE]
-MSG_DUPLICATE_EMAIL =           {'Persian': 'متاسفانه کاربری با این ایمیل وجود دارد', 'English': 'Sorry, user with this email already exists!'}[MSG_LANGUAGE]
+MSG_DUPLICATE_EMAIL =           {'Persian': 'متاسفانه کاربری با این رایانامه وجود دارد', 'English': 'Sorry, user with this email already exists!'}[MSG_LANGUAGE]
 MSG_DUPLICATE_USERNAME =        {'Persian': 'متاسفانه کاربری با این نام کاربری وجود دارد', 'English': 'Sorry, user with this username already exists!'}[MSG_LANGUAGE]
 MSG_NONMATH_PASSWORDS =         {'Persian': 'رمز عبور و تکرار آن یکسان نیستند', 'English': 'Passwords must match!'}[MSG_LANGUAGE]
 MSG_INVALID_FIELDS =            {'Persian': 'ورودی (های) نامعتبر', 'English': 'invalid fields'}[MSG_LANGUAGE]
@@ -41,7 +41,7 @@ MSG_INVALID_LINK =              {'Persian': 'لینک فعال سازی نامع
 MSG_WRONG_USERNAMEPASSWORD =    {'Persian': 'نام کاربری یا رمز عبور اشتباه است', 'English': 'Wrong username or password!'}[MSG_LANGUAGE]
 MSG_WRONG_OLDPASSWORD =         {'Persian': 'رمز عبور قدیمی اشتباه است', 'English': "The old password is wrong!"}[MSG_LANGUAGE]
 MSG_NONEXISTANT_USERNAME =      {'Persian': 'چنین کاربری وجود ندارد', 'English': 'There is no such username!'}[MSG_LANGUAGE]
-MSG_NONVERIFIED_EMAIL =         {'Persian': 'این ایمیل فاقد اعتبار کاربری است', 'English': 'This email is not verified yet!'}[MSG_LANGUAGE]
+MSG_NONVERIFIED_EMAIL =         {'Persian': 'این رایانامه فاقد اعتبار کاربری است', 'English': 'This email is not verified yet!'}[MSG_LANGUAGE]
 MSG_CANNOT_RETRIEVE =           {'Persian': 'متاسفانه بازیابی رمز عبور فعلا برای شما ممکن نمی باشد', 'English': 'Sorry, you cannot retrieve your account for now.'}[MSG_LANGUAGE]
 MSG_NO_CHANGES =                {'Persian': 'هیچ تغییری اعمال نگردید', 'English': 'No changes have been made.'}[MSG_LANGUAGE]
 
@@ -49,7 +49,7 @@ MSG_REGISTER_SUCCESS =          {'Persian': 'شما با موفقیت ثبت ن�
 MSG_LOGIN_SUCCESS =             {'Persian': 'شما با موفقیت وارد حساب کاربری خود شدید', 'English': 'You successfully logged in to your account.'}[MSG_LANGUAGE]
 MSG_EDIT_SUCCESS =              {'Persian': 'شما با موفقیت اطلاعات حساب خود را تغییر دادید', 'English': 'You have successfully updated your account.'}[MSG_LANGUAGE]
 MSG_CHANGEPASSWORD_SUCCESS =    {'Persian': 'شما با موفقیت رمز عبور خود را تغییر دادید', 'English': 'You have successfully changed your password.'}[MSG_LANGUAGE]
-MSG_RESETPASSWORD_SUCCESS =     {'Persian': 'رمز عبور شما با موفقیت تغییر کرد.\n رمز عبور جدید به ایمیل شما فرستاده شده است.', 'English': 'Your password has successfully changed;\nWe sent your new password to your email account.'}[MSG_LANGUAGE]
+MSG_RESETPASSWORD_SUCCESS =     {'Persian': 'رمز عبور شما با موفقیت تغییر کرد.\n رمز عبور جدید به رایانامه شما فرستاده شده است.', 'English': 'Your password has successfully changed;\nWe sent your new password to your email account.'}[MSG_LANGUAGE]
 
 
 @api_view(['POST', ])
