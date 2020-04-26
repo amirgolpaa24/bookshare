@@ -52,11 +52,6 @@ MSG_CHANGEPASSWORD_SUCCESS =    {'Persian': 'شما با موفقیت رمز ع�
 MSG_RESETPASSWORD_SUCCESS =     {'Persian': 'رمز عبور شما با موفقیت تغییر کرد.\n رمز عبور جدید به ایمیل شما فرستاده شده است.', 'English': 'Your password has successfully changed;\nWe sent your new password to your email account.'}[MSG_LANGUAGE]
 
 
-
-
-
-
-
 @api_view(['POST', ])
 @permission_classes([])
 @authentication_classes([])
