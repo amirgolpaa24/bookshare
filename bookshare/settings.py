@@ -138,6 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+MSG_LANGUAGE = 'Persian'
 
 TIME_ZONE = 'UTC'
 
