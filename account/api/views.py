@@ -349,7 +349,8 @@ class ChangePasswordView(UpdateAPIView):
                     
         
 @api_view(['POST', ])
-@permission_classes((IsAuthenticated,))
+@permission_classes([])
+@authentication_classes([])
 def api_reset_password_view(request):
     
     if request.method == 'POST':
@@ -361,13 +362,28 @@ def api_reset_password_view(request):
             data['message'] = 'No email was provided!'
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        user = request.user
-        if (not user.is_active) or user.email != email:
-            data['message'] = 'This email is not verified in your account!'
+        user = None
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            data['message'] = 'This email is not verified yet!'
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
+        if (not user.is_active):
+            data['message'] = 'This email is not verified yet!'
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.last_retrieval is not None and (datetime.now() - user.last_retrieval) < timedelta(hour=1):
+            data['message'] = 'Sorry, you cannot retrieve your account for now.'
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+        # if ok:
         new_password = User.objects.make_random_password()
         user.set_password(new_password)
+        user.save()
+
+        # setting the limitation:
+        user.last_retrieval = datetime.now()
         user.save()
 
         # sending email with new password:
@@ -379,4 +395,5 @@ def api_reset_password_view(request):
         
         email_destination = email
         EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+        
         return Response({'message': 'Your password has successfully changed;\nWe sent your new password to your email account.'}, status=status.HTTP_200_OK)

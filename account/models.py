@@ -79,6 +79,8 @@ class User(AbstractBaseUser):
     date_joined =       models.DateTimeField(verbose_name='date joined', auto_now_add=True, editable=False)
     last_login =        models.DateTimeField(verbose_name='last login', auto_now=True, editable=False)
 
+    last_retrieval =    models.DateTimeField(verbose_name='last retrieval', null=True)
+
     is_admin =          models.BooleanField(default=False)
     is_active =         models.BooleanField(default=False)
     is_staff =          models.BooleanField(default=False)
