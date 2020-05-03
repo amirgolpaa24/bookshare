@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'username', 'email', 'image', 'books_count', 'rating']
 
 
-class EditedUserSerializer(serializers.ModelSerializer):
+class EditUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username']
@@ -57,3 +57,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
     new_password_confirmation = serializers.CharField(required=True)
+
+
+class EditImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['image']

@@ -21,13 +21,15 @@ from rest_framework.views import APIView
 from account.models import User
 from account.tokens import account_activation_token
 
-from .serializers import (ChangePasswordSerializer, EditedUserSerializer,
+from .serializers import (ChangePasswordSerializer, EditUserSerializer,
                           SelfUserSerializer, UserRegisterationSerializer,
-                          UserSerializer)
+                          UserSerializer, EditImageSerializer)
+from django.http import HttpResponse
 
 
 # messages:
 MSG_NO_EMAIL =                  {'Persian': 'رایانامه ارائه نشده است', 'English': 'No email was provided!'}[MSG_LANGUAGE]
+MSG_NO_IMAGE =                  {'Persian': 'تصویر ارائه نشده است', 'English': 'No image was provided!'}[MSG_LANGUAGE]
 MSG_NO_USERNAME =               {'Persian': 'نام کاربری ارائه نشده است', 'English': 'No username was provided!'}[MSG_LANGUAGE]
 MSG_NO_FIRSTNAME =              {'Persian': 'نام کوچک ارائه نشده است', 'English': 'No first name was provided!'}[MSG_LANGUAGE]
 MSG_NO_LASTNAME =               {'Persian': 'نام خانوادگی ارائه نشده است', 'English': 'No last name was provided!'}[MSG_LANGUAGE]
@@ -47,7 +49,8 @@ MSG_NO_CHANGES =                {'Persian': 'هیچ تغییری اعمال نگ
 
 MSG_REGISTER_SUCCESS =          {'Persian': 'شما با موفقیت ثبت نام کردید', 'English': 'You have successfully registered your account.'}[MSG_LANGUAGE]
 MSG_LOGIN_SUCCESS =             {'Persian': 'شما با موفقیت وارد حساب کاربری خود شدید', 'English': 'You successfully logged in to your account.'}[MSG_LANGUAGE]
-MSG_EDIT_SUCCESS =              {'Persian': 'شما با موفقیت اطلاعات حساب خود را تغییر دادید', 'English': 'You have successfully updated your account.'}[MSG_LANGUAGE]
+MSG_EDIT_ACCOUNT_SUCCESS =      {'Persian': 'شما با موفقیت اطلاعات حساب خود را تغییر دادید', 'English': 'You have successfully updated your account.'}[MSG_LANGUAGE]
+MSG_EDIT_IMAGE_SUCCESS =        {'Persian': 'شما با موفقیت تصویر را تغییر دادید', 'English': 'You have successfully updated your image.'}[MSG_LANGUAGE]
 MSG_CHANGEPASSWORD_SUCCESS =    {'Persian': 'شما با موفقیت رمز عبور خود را تغییر دادید', 'English': 'You have successfully changed your password.'}[MSG_LANGUAGE]
 MSG_RESETPASSWORD_SUCCESS =     {'Persian': 'رمز عبور شما با موفقیت تغییر کرد.\n رمز عبور جدید به رایانامه شما فرستاده شده است.', 'English': 'Your password has successfully changed;\nWe sent your new password to your email account.'}[MSG_LANGUAGE]
 
@@ -66,7 +69,6 @@ def api_register_user_view(request):
         last_name = request.data.get('last_name', '0_no_last_name_provided_0')
         password = request.data.get('password', '0_no_password_provided_0')
         password_confirmation = request.data.get('password_confirmation', '0_no_password_confirmation_provided_0')
-        image = request.data.get('image', '0_no_image_provided_0')
 
         if email == '0_no_email_provided_0' or email == '':
             data['message'] = MSG_NO_EMAIL
@@ -153,7 +155,6 @@ def activate(request, uidb64, token):
         data['email'] = user.email
         data['first_name'] = user.first_name
         data['last_name'] = user.last_name
-        data['image'] = get_user_profile_image(user)
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -240,7 +241,6 @@ class ObtainAuthTokenView(APIView):
             data['email'] = user.email
             data['first_name'] = user.first_name
             data['last_name'] = user.last_name
-            data['image'] = get_user_profile_image(user)
             return Response(data, status=status.HTTP_200_OK)
         else:
             data['message'] = MSG_WRONG_USERNAMEPASSWORD
@@ -254,10 +254,9 @@ def api_account_properties_view(request, username):
     if request.method == 'GET':
         try:
             user = User.objects.get(username=username)
+            if not user.is_active:
+                raise User.DoesNotExist
         except User.DoesNotExist:
-            return Response({'message': MSG_NONEXISTANT_USERNAME}, status=status.HTTP_404_NOT_FOUND)
-
-        if not user.is_active:
             return Response({'message': MSG_NONEXISTANT_USERNAME}, status=status.HTTP_404_NOT_FOUND)
 
         requester = request.user
@@ -285,15 +284,65 @@ def api_edit_account_view(request):
             if field in request.data:
                 request_data[field] = request.data[field]
 
-        serializer = EditedUserSerializer(user, data=request_data, partial=True)
+        serializer = EditUserSerializer(user, data=request_data, partial=True)
         
         if serializer.is_valid():
             serializer.save()
-            return Response(data={'message': MSG_EDIT_SUCCESS}, status=status.HTTP_200_OK)
+            return Response(data={'message': MSG_EDIT_ACCOUNT_SUCCESS}, status=status.HTTP_200_OK)
         else:
             data = serializer.errors
             data['message'] = MSG_INVALID_FIELDS
             return Response(data, status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT', ])
+@permission_classes((IsAuthenticated,))
+def api_edit_image_view(request):
+    if request.method == 'PUT':
+        data = {}
+        
+        image = request.data.get('image', None)
+        if image is None or image == '':
+            data['message'] = MSG_NO_IMAGE
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+
+        serializer = EditImageSerializer(user, data={'image': image})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data={'message': MSG_EDIT_IMAGE_SUCCESS}, status=status.HTTP_200_OK)
+        else:
+            data = serializer.errors
+            data['message'] = MSG_INVALID_FIELDS
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated,))
+def api_get_profile_image_view(request, username):
+    if request.method == 'GET':
+        try:
+            user = User.objects.get(username=username)
+            if not user.is_active:
+                raise User.DoesNotExist
+        except User.DoesNotExist:
+            return Response({'message': MSG_NONEXISTANT_USERNAME}, status=status.HTTP_404_NOT_FOUND)
+
+        image_path = 'account/media/default_user_profile_image.png'
+        try:
+            if user.image is not None:
+                image_path = user.image.path
+        except ValueError:
+            pass
+    
+        try:
+            with open(image_path, "rb") as image_file:
+                return HttpResponse(image_file.read(), content_type="image/jpeg")
+        except IOError as e:
+            with open('account/media/default_user_profile_image.png', "rb") as image_file:
+                return HttpResponse(image_file.read(), content_type="image/jpeg")
+
 
 
 class ChangePasswordView(UpdateAPIView):

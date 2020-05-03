@@ -1,4 +1,6 @@
 import re
+import os
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -58,9 +60,13 @@ def validate_persian_username(input_string=''):
     arabic_numbers_codepoints = '\u0660-\u0669'
 
     return persian_alpha_codepoints + additional_arabic_characters_codepoints + punctuation_marks_codepoints + persian_num_codepoints
-    # return re.search('^[\s,'+persian_alpha_codepoints+additional_arabic_characters_codepoints
-    #                     +punctuation_marks_codepoints+
-    #                     persian_num_codepoints+']*$', input_string)
+
+
+def create_profile_image_upload_path(instance, filename):
+    extension = filename.split('.')[-1]
+    file_name = '{}.{}'.format(str(instance.pk) + '-' + uuid4().hex, extension)
+
+    return os.path.join('profile_images/', file_name)
 
 
 class User(AbstractBaseUser):
@@ -72,7 +78,7 @@ class User(AbstractBaseUser):
                                 'a-zA-Z0-9._]+(?<![_.])$', message="Username can only contain alphabets, numbers, '_', or '.' in an accepted manner;\nUsername should be 8 to 30 characters long.")])
     email =             models.EmailField(max_length=254, unique=True, blank=False, null=False)
 
-    image =             models.ImageField(upload_to='profile_images/', default='./profile_images/default_user_profile_image.png', blank=False, null=False)
+    image =             models.ImageField(unique=True, upload_to=create_profile_image_upload_path, blank=False, null=True)
     books_count =       models.PositiveIntegerField(default=0)
     rating =            models.FloatField(default=0.0)
 
