@@ -301,6 +301,9 @@ def api_edit_image_view(request):
     if request.method == 'PUT':
         data = {}
         
+        s = str(dict(request.data)) + '\n' + str(request.content_type)
+        return Response({'message': s}, status.HTTP_400_BAD_REQUEST)
+
         image = request.data.get('image', None)
         if image is None or image == '':
             data['message'] = MSG_NO_IMAGE
