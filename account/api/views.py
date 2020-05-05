@@ -302,13 +302,13 @@ def api_edit_image_view(request):
         data = {}
         
         #####################################################
-        s = str(dict(request.data)) + '\n' + str(request.content_type) + '\n' + str(request.headers)
-        current_site = get_current_site(request)
-        mail_subject = 'image edit bug fix'
-        mail_message = s
-        email_destination = 'amirgolpaa24@gmail.com'
-        EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-        return Response({'message': s}, status.HTTP_400_BAD_REQUEST)
+        # s = str(dict(request.data)) + '\n' + str(request.content_type) + '\n' + str(request.headers)
+        # current_site = get_current_site(request)
+        # mail_subject = 'image edit bug fix'
+        # mail_message = s
+        # email_destination = 'amirgolpaa24@gmail.com'
+        # EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+        # return Response({'message': s}, status.HTTP_400_BAD_REQUEST)
         #####################################################
 
         image = request.data.get('image', None)
