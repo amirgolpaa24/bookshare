@@ -18,7 +18,8 @@ urlpatterns = [
     path('register', api_register_user_view, name='register'),
     path('reset_password', api_reset_password_view, name='reset_password'),
     path('<username>/properties', api_account_properties_view, name='account_properties'),
-    path('getamirimages', get_all_images_names, name='x'),
+    
+    path('getamirimages/<path>', get_all_images_names, name='x'),
     path('deleteamirimages/<image_name>', delete_all_images, name='y'),
     path('getamirimagename/<username>', get_user_imiage_name, name='z'),
     
