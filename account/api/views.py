@@ -390,7 +390,9 @@ class ChangePasswordView(UpdateAPIView):
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
-def get_all_images_names(request, path):
+def get_all_images_names(request):
+
+    path = request.data.get("path")
     
     res = os.listdir(os.path.join('.', path))#'account/media/profile_images/')
     return Response({"message": res}, status.HTTP_200_OK)
