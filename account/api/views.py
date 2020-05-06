@@ -393,23 +393,18 @@ class ChangePasswordView(UpdateAPIView):
 # @api_view(['GET', ])
 # @permission_classes((IsAuthenticated,))
 # def get_that_image(request):
-
 #     image_path = request.data.get("path")
-    
 #     with open(image_path, "rb") as image_file:
 #         return HttpResponse(image_file.read(), content_type="image/jpeg")
 # @api_view(['GET', ])
 # @permission_classes((IsAuthenticated,))
 # def get_all_images_names(request):
-
 #     path = request.data.get("path")
-    
 #     res = os.listdir(os.path.join('.', path))#'account/media/profile_images/')
 #     return Response({"message": res}, status.HTTP_200_OK)
 # @api_view(['PUT', ])    
 # @permission_classes((IsAuthenticated,))
 # def delete_all_images(request, image_name):
-    
 #     os.remove(os.path.join('account/media/profile_images', image_name))
 #     return Response({"message": image_name + "was deleted successfully!"}, status.HTTP_200_OK)
 # @api_view(['GET', ])    
