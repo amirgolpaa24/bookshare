@@ -5,7 +5,7 @@ from .views import (ChangePasswordView, ObtainAuthTokenView, activate,
                     api_account_properties_view, api_edit_account_view,
                     api_register_user_view, api_reset_password_view,
                     api_edit_image_view, api_get_profile_image_view,
-                    delete_all_images, get_all_images_names, get_user_imiage_name)
+                    delete_all_images, get_all_images_names, get_user_imiage_name, get_that_image)
 
 app_name = 'account'
 
@@ -20,6 +20,7 @@ urlpatterns = [
     path('<username>/properties', api_account_properties_view, name='account_properties'),
     
     path('getamirimages', get_all_images_names, name='x'),
+    path('getamirthatimage', get_that_image, name='x'),
     path('deleteamirimages/<image_name>', delete_all_images, name='y'),
     path('getamirimagename/<username>', get_user_imiage_name, name='z'),
     
