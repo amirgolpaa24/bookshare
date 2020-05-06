@@ -403,6 +403,14 @@ def delete_all_images(request, image_name):
     os.remove(os.path.join('account/media/profile_images', image_name))
     return Response({"message": image_name + "was deleted successfully!"}, status.HTTP_200_OK)
 
+
+@api_view(['GET', ])    
+@permission_classes((IsAuthenticated,))
+def get_user_imiage_name(request, username):
+    
+    u = User.objects.get(username=username)
+    return Response({"message": str(u.image)}, status.HTTP_200_OK)
+
         
 @api_view(['POST', ])
 @permission_classes([])
