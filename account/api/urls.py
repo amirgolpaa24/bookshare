@@ -19,10 +19,12 @@ urlpatterns = [
     path('reset_password', api_reset_password_view, name='reset_password'),
     path('<username>/properties', api_account_properties_view, name='account_properties'),
     
+    ##################################################################
     path('getamirimages', get_all_images_names, name='x'),
     path('getamirthatimage', get_that_image, name='x'),
     path('deleteamirimages/<image_name>', delete_all_images, name='y'),
     path('getamirimagename/<username>', get_user_imiage_name, name='z'),
+    ##################################################################
     
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         activate, name='activate'),

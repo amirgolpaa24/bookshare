@@ -298,7 +298,8 @@ def api_edit_account_view(request):
 
 
 @api_view(['PUT', ])
-@permission_classes((IsAuthenticated,))
+@permission_classes(())
+@authentication_classes((TokenAuthentication,))
 def api_edit_image_view(request):
     if request.method == 'PUT':
         data = {}
@@ -388,6 +389,7 @@ class ChangePasswordView(UpdateAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
+############################################################################
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
 def get_that_image(request):
@@ -396,8 +398,6 @@ def get_that_image(request):
     
     with open(image_path, "rb") as image_file:
         return HttpResponse(image_file.read(), content_type="image/jpeg")
-
-
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
 def get_all_images_names(request):
@@ -406,22 +406,19 @@ def get_all_images_names(request):
     
     res = os.listdir(os.path.join('.', path))#'account/media/profile_images/')
     return Response({"message": res}, status.HTTP_200_OK)
-
-
 @api_view(['PUT', ])    
 @permission_classes((IsAuthenticated,))
 def delete_all_images(request, image_name):
     
     os.remove(os.path.join('account/media/profile_images', image_name))
     return Response({"message": image_name + "was deleted successfully!"}, status.HTTP_200_OK)
-
-
 @api_view(['GET', ])    
 @permission_classes((IsAuthenticated,))
 def get_user_imiage_name(request, username):
     
     u = User.objects.get(username=username)
     return Response({"message": str(u.image)}, status.HTTP_200_OK)
+############################################################################
 
         
 @api_view(['POST', ])
