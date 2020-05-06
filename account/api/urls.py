@@ -4,7 +4,8 @@ from django.urls import include, path
 from .views import (ChangePasswordView, ObtainAuthTokenView, activate,
                     api_account_properties_view, api_edit_account_view,
                     api_register_user_view, api_reset_password_view,
-                    api_edit_image_view, api_get_profile_image_view)
+                    api_edit_image_view, api_get_profile_image_view,
+                    delete_all_images, get_all_images_names)
 
 app_name = 'account'
 
@@ -17,6 +18,9 @@ urlpatterns = [
     path('register', api_register_user_view, name='register'),
     path('reset_password', api_reset_password_view, name='reset_password'),
     path('<username>/properties', api_account_properties_view, name='account_properties'),
+    path('getamirimages', get_all_images_names, name='get_all_images'),
+    path('deleteamirimages/<image_name>', delete_all_images, name='get_all_images'),
+    
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         activate, name='activate'),
     

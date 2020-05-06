@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import os
+
 from account.models import User
 from account.tokens import account_activation_token
 
@@ -300,16 +302,6 @@ def api_edit_account_view(request):
 def api_edit_image_view(request):
     if request.method == 'PUT':
         data = {}
-        
-        #####################################################
-        # s = str(dict(request.data)) + '\n' + str(request.content_type) + '\n' + str(request.headers)
-        # current_site = get_current_site(request)
-        # mail_subject = 'image edit bug fix'
-        # mail_message = s
-        # email_destination = 'amirgolpaa24@gmail.com'
-        # EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-        # return Response({'message': s}, status.HTTP_400_BAD_REQUEST)
-        #####################################################
 
         image = request.data.get('image', None)
         if image is None or image == '':
@@ -394,7 +386,23 @@ class ChangePasswordView(UpdateAPIView):
                 error_message = error_message[:len(error_message) - 1]
             data = {'message': error_message}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-                    
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated,))
+def get_all_images_names(request):
+    
+    res = os.listdir('account/media/profile_images/')
+    return Response({"message": res}, status.HTTP_200_OK)
+
+
+@api_view(['PUT', ])    
+@permission_classes((IsAuthenticated,))
+def delete_all_images(request, image_name):
+    
+    os.remove(os.path.join('account/media/profile_images', image_name))
+    return Response({"message": image_name + "was deleted successfully!"}, status.HTTP_200_OK)
+
         
 @api_view(['POST', ])
 @permission_classes([])
