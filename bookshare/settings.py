@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'account',
+    'book',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -156,8 +157,10 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'account/media/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+DEFAULT_PROFILE_IMAGE = 'default_profile_image.png'
+DEFAULT_BOOK_IMAGE = 'default_book_image.png'
 
 django_heroku.settings(locals())

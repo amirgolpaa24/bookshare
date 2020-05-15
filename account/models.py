@@ -1,4 +1,3 @@
-import re
 import os
 from uuid import uuid4
 
@@ -8,7 +7,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 
@@ -46,6 +44,7 @@ class UserManager(BaseUserManager):
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
+        user.is_active = True
 
         user.save(using=self._db)
         return user 
@@ -78,8 +77,7 @@ class User(AbstractBaseUser):
                                 'a-zA-Z0-9._]+(?<![_.])$', message="Username can only contain alphabets, numbers, '_', or '.' in an accepted manner;\nUsername should be 8 to 30 characters long.")])
     email =             models.EmailField(max_length=254, unique=True, blank=False, null=False)
 
-    image =             models.ImageField(unique=True, upload_to=create_profile_image_upload_path, blank=False, null=True)
-    books_count =       models.PositiveIntegerField(default=0)
+    image =             models.ImageField(upload_to=create_profile_image_upload_path, blank=False, null=True)
     rating =            models.FloatField(default=0.0)
 
     date_joined =       models.DateTimeField(verbose_name='date joined', auto_now_add=True, editable=False)
@@ -108,13 +106,22 @@ class User(AbstractBaseUser):
         # Simplest possible answer: Yes, always
         return True
 
+
+    @property
+    def books_list(self):
+        """ returns a list of slugs of this user's books """
+        return [book.slug for book in self.book_set.all()]
+
+    @property
+    def books_count(self):
+        return len(self.books_list)
+
     @property
     def full_name(self):
         return self.first_name + ' ' + self.last_name
 
-    def get_full_name(self):
-        return self.first_name + ' ' + self.last_name
-    def get_short_name(self):
+    @property
+    def short_name(self):
         return self.first_name
 
     def __str__(self):

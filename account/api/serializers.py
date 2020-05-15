@@ -6,13 +6,15 @@ from account.models import User
 class SelfUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [  'first_name', 'last_name', 'username', 'email', 'image', 
+                    'books_count', 'rating', 'books_list', ]
 
     
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'image', 'books_count', 'rating']
+        fields = [  'first_name', 'last_name', 'username', 'email', 'image', 
+                    'books_count', 'rating', 'books_list']
 
 
 class EditUserSerializer(serializers.ModelSerializer):
@@ -63,3 +65,7 @@ class EditImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['image']
+
+
+class UserBookListSerializer(serializers.Serializer):
+    pass

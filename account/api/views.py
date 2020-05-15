@@ -1,10 +1,10 @@
+import os
 from datetime import datetime, timedelta
-
-from bookshare.settings import MSG_LANGUAGE
 
 from django.contrib.auth import authenticate
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage, send_mail
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -18,16 +18,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import os
-
 from account.models import User
 from account.tokens import account_activation_token
+from bookshare.settings import (DEFAULT_BOOK_IMAGE, DEFAULT_PROFILE_IMAGE,
+                                MEDIA_ROOT, MSG_LANGUAGE)
 
-from .serializers import (ChangePasswordSerializer, EditUserSerializer,
-                          SelfUserSerializer, UserRegisterationSerializer,
-                          UserSerializer, EditImageSerializer)
-from django.http import HttpResponse
-
+from .serializers import (ChangePasswordSerializer, EditImageSerializer,
+                          EditUserSerializer, SelfUserSerializer,
+                          UserRegisterationSerializer, UserSerializer)
 
 # messages:
 MSG_NO_EMAIL =                  {'Persian': 'رایانامه ارائه نشده است', 'English': 'No email was provided!'}[MSG_LANGUAGE]
@@ -45,7 +43,7 @@ MSG_INVALID_LINK =              {'Persian': 'لینک فعال سازی نامع
 MSG_WRONG_USERNAMEPASSWORD =    {'Persian': 'نام کاربری یا رمز عبور اشتباه است', 'English': 'Wrong username or password!'}[MSG_LANGUAGE]
 MSG_WRONG_OLDPASSWORD =         {'Persian': 'رمز عبور قدیمی اشتباه است', 'English': "The old password is wrong!"}[MSG_LANGUAGE]
 MSG_NONEXISTANT_USERNAME =      {'Persian': 'چنین کاربری وجود ندارد', 'English': 'There is no such username!'}[MSG_LANGUAGE]
-MSG_NONVERIFIED_EMAIL =         {'Persian': 'این رایانامه فاقد اعتبار کاربری است', 'English': 'This email is not verified yet!'}[MSG_LANGUAGE]
+MSG_UNVERIFIED_EMAIL =         {'Persian': 'این رایانامه فاقد اعتبار کاربری است', 'English': 'This email is not verified yet!'}[MSG_LANGUAGE]
 MSG_CANNOT_RETRIEVE =           {'Persian': 'متاسفانه بازیابی رمز عبور فعلا برای شما ممکن نمی باشد', 'English': 'Sorry, you cannot retrieve your account for now.'}[MSG_LANGUAGE]
 MSG_NO_CHANGES =                {'Persian': 'هیچ تغییری اعمال نگردید', 'English': 'No changes have been made.'}[MSG_LANGUAGE]
 
@@ -65,29 +63,29 @@ def api_register_user_view(request):
     if request.method == 'POST':        
         data = {}
 
-        email = request.data.get('email', '0_no_email_provided_0').lower()
-        username = request.data.get('username', '0_no_username_provided_0')
-        first_name = request.data.get('first_name', '0_no_first_name_provided_0')
-        last_name = request.data.get('last_name', '0_no_last_name_provided_0')
-        password = request.data.get('password', '0_no_password_provided_0')
-        password_confirmation = request.data.get('password_confirmation', '0_no_password_confirmation_provided_0')
+        email = request.data.get('email', None).lower()
+        username = request.data.get('username', None)
+        first_name = request.data.get('first_name', None)
+        last_name = request.data.get('last_name', None)
+        password = request.data.get('password', None)
+        password_confirmation = request.data.get('password_confirmation', None)
 
-        if email == '0_no_email_provided_0' or email == '':
+        if email  is None or email == '':
             data['message'] = MSG_NO_EMAIL
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if username == '0_no_username_provided_0' or username == '':
+        if username  is None or username == '':
             data['message'] = MSG_NO_USERNAME
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if first_name == '0_no_first_name_provided_0' or first_name == '':
+        if first_name  is None or first_name == '':
             data['message'] = MSG_NO_FIRSTNAME
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if last_name == '0_no_last_name_provided_0' or last_name == '':
+        if last_name  is None or last_name == '':
             data['message'] = MSG_NO_LASTNAME
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if password == '0_no_password_provided_0' or password == '':
+        if password  is None or password == '':
             data['message'] = MSG_NO_PASSWORD
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if password_confirmation == '0_no_password_confirmation_provided_0' or password_confirmation == '':
+        if password_confirmation  is None or password_confirmation == '':
             data['message'] = MSG_NO_PASSWORDCONFIRMATION
             return Response(data, status.HTTP_400_BAD_REQUEST)
         
@@ -165,15 +163,6 @@ def activate(request, uidb64, token):
         return Response({'message': MSG_INVALID_LINK}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_user_profile_image(user):
-    image = user.image
-    if image is not None:
-        ####################
-        image = 'no image'
-        return image
-    return 'no image'
-
-
 def validate_email(email):
     user_with_this_email = None
     try:
@@ -219,14 +208,14 @@ class ObtainAuthTokenView(APIView):
     permission_classes = []
     
     def post(self, request):
-        username = request.data.get('username', '0_no_username_provided_0')
-        password = request.data.get('password', '0_no_password_provided_0')
+        username = request.data.get('username', None)
+        password = request.data.get('password', None)
 
         data = {}
-        if username == '0_no_username_provided_0' or username == '':
+        if username  is None or username == '':
             data['message'] = MSG_NO_USERNAME
             return Response(data, status.HTTP_400_BAD_REQUEST)
-        if password == '0_no_password_provided_0' or password == '':
+        if password  is None or password == '':
             data['message'] = MSG_NO_PASSWORD
             return Response(data, status.HTTP_400_BAD_REQUEST)
 
@@ -297,6 +286,15 @@ def api_edit_account_view(request):
             return Response(data, status.HTTP_400_BAD_REQUEST)
 
 
+def remove_old_profile_image(user):
+    path = os.listdir(os.path.join(MEDIA_ROOT, 'profile_images'))
+    for profile_image_name in path:
+        if profile_image_name.startswith(str(user.pk) + '-'):
+            os.remove(os.path.join(path, profile_image_name))
+            break
+    return
+
+
 @api_view(['PUT', ])
 @permission_classes(())
 @authentication_classes((TokenAuthentication,))
@@ -313,6 +311,7 @@ def api_edit_image_view(request):
 
         serializer = EditImageSerializer(user, data={'image': image})
         if serializer.is_valid():
+            remove_old_profile_image(user)
             serializer.save()
             return Response(data={'message': MSG_EDIT_IMAGE_SUCCESS}, status=status.HTTP_200_OK)
         else:
@@ -332,7 +331,8 @@ def api_get_profile_image_view(request, username):
         except User.DoesNotExist:
             return Response({'message': MSG_NONEXISTANT_USERNAME}, status=status.HTTP_404_NOT_FOUND)
 
-        image_path = 'account/media/default_user_profile_image.png'
+        DEFAULT_PROFILE_IMAGE_PATH = os.path.join(MEDIA_ROOT, DEFAULT_PROFILE_IMAGE)
+        image_path = DEFAULT_PROFILE_IMAGE_PATH
         try:
             if user.image is not None:
                 image_path = user.image.path
@@ -343,9 +343,8 @@ def api_get_profile_image_view(request, username):
             with open(image_path, "rb") as image_file:
                 return HttpResponse(image_file.read(), content_type="image/jpeg")
         except IOError as e:
-            with open('account/media/default_user_profile_image.png', "rb") as image_file:
+            with open(DEFAULT_PROFILE_IMAGE_PATH, "rb") as image_file:
                 return HttpResponse(image_file.read(), content_type="image/jpeg")
-
 
 
 class ChangePasswordView(UpdateAPIView):
@@ -388,33 +387,6 @@ class ChangePasswordView(UpdateAPIView):
             data = {'message': error_message}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-
-############################################################################
-# @api_view(['GET', ])
-# @permission_classes((IsAuthenticated,))
-# def get_that_image(request):
-#     image_path = request.data.get("path")
-#     with open(image_path, "rb") as image_file:
-#         return HttpResponse(image_file.read(), content_type="image/jpeg")
-# @api_view(['GET', ])
-# @permission_classes((IsAuthenticated,))
-# def get_all_images_names(request):
-#     path = request.data.get("path")
-#     res = os.listdir(os.path.join('.', path))#'account/media/profile_images/')
-#     return Response({"message": res}, status.HTTP_200_OK)
-# @api_view(['PUT', ])    
-# @permission_classes((IsAuthenticated,))
-# def delete_all_images(request, image_name):
-#     os.remove(os.path.join('account/media/profile_images', image_name))
-#     return Response({"message": image_name + "was deleted successfully!"}, status.HTTP_200_OK)
-# @api_view(['GET', ])    
-# @permission_classes((IsAuthenticated,))
-# def get_user_imiage_name(request, username):
-    
-    u = User.objects.get(username=username)
-    return Response({"message": str(u.image)}, status.HTTP_200_OK)
-############################################################################
-
         
 @api_view(['POST', ])
 @permission_classes([])
@@ -423,10 +395,10 @@ def api_reset_password_view(request):
     
     if request.method == 'POST':
         
-        email = request.data.get('email', '0_no_email_provided_0').lower()
+        email = request.data.get('email', None).lower()
         data = {}
         
-        if email == '0_no_email_provided_0' or email == '':
+        if email  is None or email == '':
             data['message'] = MSG_NO_EMAIL
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -434,11 +406,11 @@ def api_reset_password_view(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            data['message'] = MSG_NONVERIFIED_EMAIL
+            data['message'] = MSG_UNVERIFIED_EMAIL
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         
         if (not user.is_active):
-            data['message'] = MSG_NONVERIFIED_EMAIL
+            data['message'] = MSG_UNVERIFIED_EMAIL
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         
         if user.last_retrieval is not None and (datetime.now() - user.last_retrieval) < timedelta(hour=1):
@@ -465,3 +437,4 @@ def api_reset_password_view(request):
         EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
         
         return Response({'message': MSG_RESETPASSWORD_SUCCESS}, status=status.HTTP_200_OK)
+
