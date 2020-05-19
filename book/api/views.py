@@ -221,7 +221,7 @@ def remove_old_book_image(book):
     path = os.listdir(os.path.join(MEDIA_ROOT, 'book_images'))
     for book_image_name in path:
         if book_image_name.startswith(str(book.pk) + '-'):
-            os.remove(os.path.join(path, book_image_name))
+            os.remove(os.path.join(MEDIA_ROOT, 'book_images', book_image_name))
             break
     return
 

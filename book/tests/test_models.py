@@ -47,19 +47,19 @@ class BookTestCase(TestCase):
         self.assertEquals(test_book.author_set.all()[0].book, test_book)
     
     def test_categories(self):
-        test_category_1 = Book.Category_Choice[0]
+        test_category_1 = Book.Category_Choice[0][0]
         test_book = Book.objects.create(title = "test_title", description="test_description", page_num=666, owner=User.objects.create(username="test_user"), category_1=test_category_1)
-        self.assertEqual(test_book.categories, [test_category_1])
+        self.assertEqual(test_book.categories_list, [test_category_1])
 
-        test_category_2 = Book.Category_Choice[0]
+        test_category_2 = Book.Category_Choice[1][0]
         test_book.category_2 = test_category_2
         test_book.save()
-        self.assertEqual(test_book.categories, [test_category_1, test_category_2])
+        self.assertEqual(test_book.categories_list, [test_category_1, test_category_2])
 
-        test_category_3 = Book.Category_Choice[0]
+        test_category_3 = Book.Category_Choice[-1][0]
         test_book.category_3 = test_category_3
         test_book.save()
-        self.assertEqual(test_book.categories, [test_category_1, test_category_2, test_category_3])
+        self.assertEqual(test_book.categories_list, [test_category_1, test_category_2, test_category_3])
 
 
 class AuthorTransactionTestCase(TransactionTestCase):

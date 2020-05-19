@@ -290,7 +290,7 @@ def remove_old_profile_image(user):
     path = os.listdir(os.path.join(MEDIA_ROOT, 'profile_images'))
     for profile_image_name in path:
         if profile_image_name.startswith(str(user.pk) + '-'):
-            os.remove(os.path.join(path, profile_image_name))
+            os.remove(os.path.join(MEDIA_ROOT, 'profile_images', profile_image_name))
             break
     return
 

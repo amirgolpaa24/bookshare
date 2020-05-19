@@ -109,8 +109,15 @@ class User(AbstractBaseUser):
 
     @property
     def books_list(self):
-        """ returns a list of slugs of this user's books """
-        return [book.slug for book in self.book_set.all()]
+        """ returns a list of dictionaries {slug, title, authors, categories} of this user's books """
+        return [
+            {
+                "slug": book.slug,
+                "title": book.title,
+                "authors": book.authors_list,
+                "categories": book.categories_list,
+            } 
+            for book in self.book_set.all()]
 
     @property
     def books_count(self):

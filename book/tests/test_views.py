@@ -433,13 +433,13 @@ class GetBookPropertiesAPITestCase(APITestCase):
             'title': 'First Test Book',
             'description': "First test description",
             'page_num': 120,
-            'category_1': 0,
+            'category_1': '0',
             'authors': ["test_author1", "test_author2"],
             'edition': 6,
             'publisher': 'first_test_publisher',
             'pub_year': 1995,
-            'category_2': 24,
-            'category_3': 30,
+            'category_2': '24',
+            'category_3': '30',
         }
 
         return super().setUp()
@@ -506,7 +506,6 @@ class GetBookPropertiesAPITestCase(APITestCase):
             format='json'
         )
         book = Book.objects.all()[0]
-        print('###', book.when_added)
         book_slug = book.slug
 
         # the owner - getting his/her own book:

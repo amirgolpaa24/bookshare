@@ -65,6 +65,8 @@ class Book(models.Model):
 
     @property
     def authors_list(self):
+        """ returns a list of all authors' names """
+
         authors_list = []
         for author in self.author_set.all():
             authors_list.append(author.name)
@@ -72,11 +74,11 @@ class Book(models.Model):
 
     @property
     def categories_list(self):
-        categories_not_null = [int(self.category_1)]
+        categories_not_null = [self.category_1]
         if self.category_2:
-            categories_not_null.append(int(self.category_2))
+            categories_not_null.append(self.category_2)
         if self.category_3:
-            categories_not_null.append(int(self.category_3))
+            categories_not_null.append(self.category_3)
         return categories_not_null
 
     def generate_unique_slug(self):

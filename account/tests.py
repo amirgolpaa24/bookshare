@@ -83,5 +83,5 @@ class GetAccountPropertiesAPITestCase(APITestCase):
         # books_count field:
         self.assertEqual(response.data['books_count'], 2)
         # books_list field:
-        self.assertEqual(set(response.data['books_list']), set([book1_slug, book2_slug]))
+        self.assertEqual(set(book_dict['slug'] for book_dict in response.data['books_list']), set([book1_slug, book2_slug]))
         
