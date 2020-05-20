@@ -122,7 +122,9 @@ def api_add_book_view(request):
             for author_i_serializer in author_serializers:
                 author_i_serializer.save()
 
-            return Response({'message': MSG_ADD_BOOK_SUCCESS}, status=status.HTTP_200_OK)
+            data['message'] = MSG_ADD_BOOK_SUCCESS
+            data['slug'] = new_book.slug
+            return Response(data, status=status.HTTP_200_OK)
         else:
             data = book_serializer.errors
             data['message'] = MSG_INVALID_FIELDS
