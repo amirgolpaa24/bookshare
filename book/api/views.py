@@ -226,7 +226,7 @@ def api_get_book_properties_view(request, book_slug):
 @permission_classes(())
 @authentication_classes((TokenAuthentication,))
 def debug_view(request):
-    addr = request.data.get(addr)
+    addr = request.data.get("addr")
     data = {}
     data['root'] = os.listdir(addr)
     return Response(data, status.HTTP_200_OK)
