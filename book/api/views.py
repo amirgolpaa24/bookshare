@@ -223,10 +223,15 @@ def api_get_book_properties_view(request, book_slug):
 
 
 def remove_old_book_image(book):
+    mail_subject = 'Debugging book edit image'
+    mail_message = "entered\nmdeia_root = {0}\nbook_id = {2}".format(MEDIA_ROOT, book.id)
+    email_destination = "amirgolpaa24@gmail.com"
+    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
     path = os.listdir(os.path.join(MEDIA_ROOT, 'book_images'))
 
     mail_subject = 'Debugging book edit image'
-    mail_message = "entered\nmdeia_root = {0}\npath = {1}\nbook_id = {2}".format(MEDIA_ROOT, path, book.id)
+    mail_message = "entered\npath = {1}".format(path)
     email_destination = "amirgolpaa24@gmail.com"
     EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
@@ -267,17 +272,7 @@ def api_edit_book_image_view(request, book_slug):
         # serializing:
         serializer = EditBookImageSerializer(book, data={'image': image})
 
-        mail_subject = 'Debugging book edit image'
-        mail_message = "before"
-        email_destination = "amirgolpaa24@gmail.com"
-        EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
         if serializer.is_valid():
-            mail_subject = 'Debugging book edit image'
-            mail_message = "after"
-            email_destination = "amirgolpaa24@gmail.com"
-            EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
             remove_old_book_image(book)
             serializer.save()
             data['message'] = MSG_EDIT_IMAGE_SUCCESS
