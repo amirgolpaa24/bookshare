@@ -22,6 +22,7 @@ from bookshare.settings import (MSG_LANGUAGE, MEDIA_ROOT, DEFAULT_BOOK_IMAGE)
 from .serializers import (  AuthorSerializer, AddBookSerializer, BookSerializer, 
                             SelfBookSerializer, EditBookSerializer, EditBookImageSerializer, )
 import os
+import json
 
 
 # messages:
@@ -86,6 +87,8 @@ def api_add_book_view(request):
             data['message'] = MSG_NO_CATEGORY
             return Response(data, status.HTTP_400_BAD_REQUEST)
         
+        if authors is not None:
+            authors = json.loads(authors)
         author_names = []
         if authors is None or type(authors) != list:
             data['message'] = MSG_AUTHORS_NOTLIST
