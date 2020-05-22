@@ -132,7 +132,7 @@ class User(AbstractBaseUser):
         return self.first_name
 
     def __str__(self):
-        return self.username
+        return self.username + "          " + self.full_name
 
     class META:
         fields = ('first_name', 'last_name', 'email', 'image',)

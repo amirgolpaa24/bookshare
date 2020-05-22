@@ -101,7 +101,13 @@ class Book(models.Model):
     def add_author(self, author_name):
         new_author = Author.objects.create(name=author_name, book=self)
 
+    def __str__(self):
+        return self.title + "     for     " + self.owner_name
+
 
 class Author(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, blank=False, default=None)
+
+    def __str__(self):
+        return self.name
