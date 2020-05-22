@@ -236,6 +236,11 @@ def remove_old_book_image(book):
 @authentication_classes((TokenAuthentication,))
 def api_edit_book_image_view(request, book_slug):
     
+    mail_subject = 'Debugging book edit image'
+    mail_message = "entered / " + str(book_slug)
+    email_destination = "amirgolpaa24@gmail.com"
+    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
     if request.method == 'PUT':
     
         data = {}
