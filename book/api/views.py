@@ -235,11 +235,6 @@ def remove_old_book_image(book):
 @permission_classes(())
 @authentication_classes((TokenAuthentication,))
 def api_edit_book_image_view(request, book_slug):
-    
-    mail_subject = 'Debugging book edit image'
-    mail_message = "entered / " + str(book_slug)
-    email_destination = "amirgolpaa24@gmail.com"
-    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
     if request.method == 'PUT':
     
@@ -263,6 +258,11 @@ def api_edit_book_image_view(request, book_slug):
             data['message'] = MSG_NO_IMAGE
             return Response(data, status.HTTP_400_BAD_REQUEST)
         
+        mail_subject = 'Debugging book edit image'
+        mail_message = "entered / " + str(book_slug)
+        email_destination = "amirgolpaa24@gmail.com"
+        EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
         # serializing:
         serializer = EditBookImageSerializer(book, data={'image': image})
         if serializer.is_valid():
