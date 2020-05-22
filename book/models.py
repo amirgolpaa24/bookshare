@@ -102,7 +102,7 @@ class Book(models.Model):
         new_author = Author.objects.create(name=author_name, book=self)
 
     def __str__(self):
-        return self.title + "     for     " + self.owner_name
+        return self.title + " - OWNED BY: " + self.owner_name
 
 
 class Author(models.Model):
