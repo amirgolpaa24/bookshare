@@ -222,28 +222,18 @@ def api_get_book_properties_view(request, book_slug):
 ################### image related api's ######################
 
 
-@api_view(['GET', ])
-@permission_classes(())
-@authentication_classes((TokenAuthentication,))
-def debug_view(request):
-    addr = request.data.get("addr")
-    data = {}
-    data['root'] = os.listdir(addr)
-    return Response(data, status.HTTP_200_OK)
+# @api_view(['GET', ])
+# @permission_classes(())
+# @authentication_classes((TokenAuthentication,))
+# def debug_view(request):
+    # addr = request.data.get("addr")
+    # data = {}
+    # data['root'] = os.listdir(addr)
+    # return Response(data, status.HTTP_200_OK)
 
 
 def remove_old_book_image(book):
-    mail_subject = 'Debugging book edit image'
-    mail_message = "entered\nmdeia_root = {0}\nbook_id = {1}".format(MEDIA_ROOT, book.id)
-    email_destination = "amirgolpaa24@gmail.com"
-    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
     path = os.listdir(os.path.join(MEDIA_ROOT, 'book_images'))
-
-    mail_subject = 'Debugging book edit image'
-    mail_message = "entered\npath = {0}".format(path)
-    email_destination = "amirgolpaa24@gmail.com"
-    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
     for book_image_name in path:
         if book_image_name.startswith(str(book.pk) + '-'):
@@ -284,26 +274,6 @@ def api_edit_book_image_view(request, book_slug):
 
         if serializer.is_valid():
             remove_old_book_image(book)
-            #############################
-
-            # mail_subject = 'Debugging book edit image'
-            # mail_message = "entered\nmdeia_root = {0}\nbook_id = {1}".format(MEDIA_ROOT, book.id)
-            # email_destination = "amirgolpaa24@gmail.com"
-            # EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
-            # path = os.listdir(os.path.join(MEDIA_ROOT, 'book_images'))
-
-            # mail_subject = 'Debugging book edit image'
-            # mail_message = "entered\npath = {0}".format(path)
-            # email_destination = "amirgolpaa24@gmail.com"
-            # EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
-            # for book_image_name in path:
-            #     if book_image_name.startswith(str(book.pk) + '-'):
-            #         os.remove(os.path.join(MEDIA_ROOT, 'book_images', book_image_name))
-            #         break
-
-            #############################
             serializer.save()
             data['message'] = MSG_EDIT_IMAGE_SUCCESS
             return Response(data=data, status=status.HTTP_200_OK)

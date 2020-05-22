@@ -16,7 +16,7 @@ urlpatterns = [
     path('<book_slug>/delete_book', api_delete_book_view, name='delete_book'),
     path('<book_slug>/properties', api_get_book_properties_view, name='get_book_properties'),
 
-    path('debug', debug_view)
+    # path('debug', debug_view)
 
 ]
 
