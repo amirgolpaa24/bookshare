@@ -83,7 +83,7 @@ class Book(models.Model):
 
     def generate_unique_slug(self):
         if not self.slug:
-            self.slug = uuid4().hex[22:] + "%" + str(self.id)
+            self.slug = uuid4().hex[22:] + "#" + str(self.id)
         self.save()
         return self.slug
 
