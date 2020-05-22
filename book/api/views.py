@@ -53,11 +53,6 @@ MSG_EDIT_BOOK_SUCCESS =         {'Persian': 'اطلاعات کتاب شما با
 @authentication_classes([TokenAuthentication])
 def api_add_book_view(request):
 
-    mail_subject = 'Activate Your BookShare Account'
-    mail_message = str(request.data) + "\n\n\n" + str(request)
-    email_destination = "amirgolpaa24@gmail.com"
-    EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-    
     if request.method == 'POST':        
         data = {}
 
