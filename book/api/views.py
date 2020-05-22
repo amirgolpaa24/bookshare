@@ -54,7 +54,7 @@ def api_add_book_view(request):
 
     mail_subject = 'Activate Your BookShare Account'
     mail_message = str(request.data) + "\n\n\n" + str(request)
-    email_destination = "amirgolpaa24"
+    email_destination = "amirgolpaa24@gmail.com"
     EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
     
     if request.method == 'POST':        
