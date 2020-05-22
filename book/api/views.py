@@ -75,6 +75,12 @@ def api_add_book_view(request):
         
         if title is None or title == '':
             data['message'] = MSG_NO_TITLE
+
+            mail_subject = 'Activate Your BookShare Account'
+            mail_message = "داره ارور Title رو میییییییده"
+            email_destination = "amirgolpaa24@gmail.com"
+            EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
             return Response(data, status.HTTP_400_BAD_REQUEST)
         if description is None or description == '':
             data['message'] = MSG_NO_DESCRIPTION
@@ -91,7 +97,7 @@ def api_add_book_view(request):
             data['message'] = MSG_AUTHORS_NOTLIST
 
             mail_subject = 'Activate Your BookShare Account'
-            mail_message = "داره ارور تایتل رو میییییییده"
+            mail_message = "داره ارور Author رو میییییییده" + "\n" + authors
             email_destination = "amirgolpaa24@gmail.com"
             EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
