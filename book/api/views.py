@@ -25,7 +25,7 @@ import os
 
 
 # messages:
-MSG_NO_TITLE =                  {'Persian': 'عنوان ارائه نشده است', 'English': 'No title was provided!'}[MSG_LANGUAGE]
+MSG_NO_TITLE =                  {'Persian': 'نام کتاب ارائه نشده است', 'English': 'No title was provided!'}[MSG_LANGUAGE]
 MSG_NO_DESCRIPTION =            {'Persian': 'توضیحات ارائه نشده است', 'English': 'No description was provided!'}[MSG_LANGUAGE]
 MSG_NO_PAGENUM =                {'Persian': 'تعداد صفحات ارائه نشده است', 'English': 'No page number was provided!'}[MSG_LANGUAGE]
 MSG_NO_CATEGORY =               {'Persian': 'دسته ارائه نشده است', 'English': 'No category was provided!'}[MSG_LANGUAGE]
