@@ -222,6 +222,16 @@ def api_get_book_properties_view(request, book_slug):
 ################### image related api's ######################
 
 
+@api_view(['GET', ])
+@permission_classes(())
+@authentication_classes((TokenAuthentication,))
+def debug_view(request):
+    addr = request.data.get(addr)
+    data = {}
+    data['root'] = os.listdir(addr)
+    return Response(data, status.HTTP_200_OK)
+
+
 def remove_old_book_image(book):
     mail_subject = 'Debugging book edit image'
     mail_message = "entered\nmdeia_root = {0}\nbook_id = {1}".format(MEDIA_ROOT, book.id)
