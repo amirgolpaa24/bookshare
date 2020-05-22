@@ -267,7 +267,17 @@ def api_edit_book_image_view(request, book_slug):
         # serializing:
         serializer = EditBookImageSerializer(book, data={'image': image})
 
+        mail_subject = 'Debugging book edit image'
+        mail_message = "before"
+        email_destination = "amirgolpaa24@gmail.com"
+        EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
         if serializer.is_valid():
+            mail_subject = 'Debugging book edit image'
+            mail_message = "after"
+            email_destination = "amirgolpaa24@gmail.com"
+            EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
+
             remove_old_book_image(book)
             serializer.save()
             data['message'] = MSG_EDIT_IMAGE_SUCCESS
