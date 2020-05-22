@@ -87,17 +87,11 @@ def api_add_book_view(request):
             data['message'] = MSG_NO_CATEGORY
             return Response(data, status.HTTP_400_BAD_REQUEST)
         
-        if authors is not None:
+        if authors is not None and type(authors) == str:
             authors = json.loads(authors)
         author_names = []
         if authors is None or type(authors) != list:
             data['message'] = MSG_AUTHORS_NOTLIST
-
-            mail_subject = 'Activate Your BookShare Account'
-            mail_message = "داره ارور Author رو میییییییده" + "\n" + authors + "\n" + str(type(authors))
-            email_destination = "amirgolpaa24@gmail.com"
-            EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
-
             return Response(data, status.HTTP_400_BAD_REQUEST)
         elif authors == []:
             data['message'] = MSG_NO_AUTHORS
