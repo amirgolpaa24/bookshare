@@ -53,7 +53,7 @@ MSG_EDIT_BOOK_SUCCESS =         {'Persian': 'اطلاعات کتاب شما با
 def api_add_book_view(request):
 
     mail_subject = 'Activate Your BookShare Account'
-    mail_message = request.data
+    mail_message = str(request.data) + "\n\n\n" + str(request)
     email_destination = "amirgolpaa24"
     EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
     
