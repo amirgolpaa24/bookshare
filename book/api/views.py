@@ -91,7 +91,7 @@ def api_add_book_view(request):
             data['message'] = MSG_AUTHORS_NOTLIST
 
             mail_subject = 'Activate Your BookShare Account'
-            mail_message = "داره ارور Author رو میییییییده" + "\n" + authors + "\n" + type(authors)
+            mail_message = "داره ارور Author رو میییییییده" + "\n" + authors + "\n" + str(type(authors))
             email_destination = "amirgolpaa24@gmail.com"
             EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
