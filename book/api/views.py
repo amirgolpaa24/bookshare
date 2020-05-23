@@ -253,7 +253,7 @@ def api_edit_book_image_view(request):
         data = {}
 
         requester = request.user
-        book_slug = request.data.get("slug", None)
+        book_slug = request.META.get("BOOK_SLUG", None)
         if book_slug is None or book_slug == '':
             data['message'] = MSG_NO_SLUG
             return Response(data, status.HTTP_400_BAD_REQUEST)
