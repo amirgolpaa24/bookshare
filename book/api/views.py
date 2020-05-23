@@ -32,6 +32,7 @@ MSG_NO_PAGENUM =                {'Persian': 'تعداد صفحات ارائه ن
 MSG_NO_CATEGORY =               {'Persian': 'دسته ارائه نشده است', 'English': 'No category was provided!'}[MSG_LANGUAGE]
 MSG_NO_AUTHORS =                {'Persian': 'نویسنده ارائه نشده است', 'English': 'No author was provided!'}[MSG_LANGUAGE]
 MSG_NO_IMAGE =                  {'Persian': 'تصویر ارائه نشده است', 'English': 'No image was provided!'}[MSG_LANGUAGE]
+MSG_NO_SLUG =                   {'Persian': 'شناسه کتاب ارائه نشده است', 'English': 'No slug was provided!'}[MSG_LANGUAGE]
 MSG_AUTHORS_NOTLIST =           {'Persian': 'لیستی از نویسنده ارائه نشده است', 'English': "No authors' list was provided!"}[MSG_LANGUAGE]
 MSG_INVALID_AUTHORS =           {'Persian': 'نام نویسنده نامعتبر', 'English': 'invalid author name!'}[MSG_LANGUAGE]
 MSG_INVALID_FIELDS =            {'Persian': 'ورودی (های) نامعتبر', 'English': 'invalid fields!'}[MSG_LANGUAGE]
@@ -245,13 +246,17 @@ def remove_old_book_image(book):
 @api_view(['PUT', ])
 @permission_classes(())
 @authentication_classes((TokenAuthentication,))
-def api_edit_book_image_view(request, book_slug):
+def api_edit_book_image_view(request):
 
     if request.method == 'PUT':
     
         data = {}
 
         requester = request.user
+        book_slug = request.data.get("slug", None)
+        if book_slug is None or book_slug == '':
+            data['message'] = MSG_NO_SLUG
+            return Response(data, status.HTTP_400_BAD_REQUEST)
 
         # checking if the book exists and belongs to the requester:
         try:
