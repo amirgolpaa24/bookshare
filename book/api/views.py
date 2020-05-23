@@ -248,6 +248,8 @@ def remove_old_book_image(book):
 @authentication_classes((TokenAuthentication,))
 def api_edit_book_image_view(request):
 
+    EmailMessage("debug", "entered", to=["amirgolpaa24@gmail.com"]).send()
+
     if request.method == 'PUT':
     
         data = {}
