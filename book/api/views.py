@@ -246,19 +246,13 @@ def remove_old_book_image(book):
 @api_view(['PUT', ])
 @permission_classes(())
 @authentication_classes((TokenAuthentication,))
-def api_edit_book_image_view(request):
-
-    EmailMessage("debug", "entered", to=["amirgolpaa24@gmail.com"]).send()
+def api_edit_book_image_view(request, book_slug):
 
     if request.method == 'PUT':
     
         data = {}
 
         requester = request.user
-        book_slug = request.META.get("HTTP_BOOK_SLUG", None)
-        if book_slug is None or book_slug == '':
-            data['message'] = MSG_NO_SLUG
-            return Response(data, status.HTTP_400_BAD_REQUEST)
 
         # checking if the book exists and belongs to the requester:
         try:
