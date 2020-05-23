@@ -2,8 +2,7 @@ from django.conf.urls import url
 from django.urls import include, path
 
 from .views import (api_add_book_view, api_edit_book_view, api_get_book_properties_view, 
-                    api_delete_book_view, api_edit_book_image_view, api_get_book_image_view, 
-                    debug_view)
+                    api_delete_book_view, api_edit_book_image_view, api_get_book_image_view, )
 
 
 app_name = 'book'
