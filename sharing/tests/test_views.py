@@ -336,6 +336,25 @@ class GetExchangePropertiesAPITestCase(APITestCase):
         self.test_message = 'test message'
         self.test_phone_number = '+989999999999'
 
+        self.reject_response_data = {
+            'response_result': 'reject',
+        }
+        self.accept_response_data = {
+            'response_result': 'accept',
+            'response_message': 'test response message',
+            'response_meeting_address': 'test response address',
+            'response_meeting_year': '1399',
+            'response_meeting_month': '3',
+            'response_meeting_day': '16',
+            'response_meeting_hour': '19',
+            'response_meeting_minute': '5',
+        }
+        self.meeting_time = self.accept_response_data['response_meeting_year'] + '/' +\
+                            self.accept_response_data['response_meeting_month'] + '/' +\
+                            self.accept_response_data['response_meeting_day'] + ' at ' +\
+                            self.accept_response_data['response_meeting_hour'] + ':' +\
+                            (self.accept_response_data['response_meeting_minute']).zfill(2)
+
         return super().setUp()
 
 
@@ -389,3 +408,53 @@ class GetExchangePropertiesAPITestCase(APITestCase):
         self.assertEqual(response_borrow_request.get('borrower').get('username'), borrow_request.borrower_username)
         self.assertEqual(response_borrow_request.get('borrower').get('email'), borrow_request.borrower.email)
        
+    def test_get_borrowed_book_properties(self):
+        # sending request:
+        borrower_client = APIClient()
+        borrower_client.force_authenticate(self.test_borrower)
+
+        borrower_client.post(
+            reverse('sharing_api:send_borrow_request', kwargs={'book_slug': self.test_book.slug}),
+            data={
+                'request_message': self.test_message,
+                'request_phone_number': self.test_phone_number,
+            },
+            format='json'
+        )
+        
+        # sending respons = reject:
+        lender_client = APIClient()
+        lender_client.force_authenticate(self.test_lender)
+        
+        lender_client.put(
+            reverse('sharing_api:send_borrow_response', kwargs={'exchange_slug': BookExchange.objects.all()[0].slug}),
+            data=self.accept_response_data,
+            format='json'
+        )
+
+        # getting borrowed book properties:
+        response = borrower_client.get(
+            reverse('sharing_api:get_exchange_properties', kwargs={'exchange_slug': BookExchange.objects.all()[0].slug}),
+        )
+        response_data = response.data
+
+        book_exchange = BookExchange.objects.all()[0]
+
+        if response.status_code != status.HTTP_200_OK:
+            print("response json:", response.data)
+
+        # response status code:
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # checking book_exchange fields:
+        self.assertEqual(response_data['book']['title'], self.test_book.title)
+        self.assertEqual(response_data['book']['description'], self.test_book.description)
+        self.assertEqual(response_data['lender']['username'], self.test_lender.username)
+        self.assertEqual(response_data['borrower']['username'], self.test_borrower.username)
+        self.assertEqual(response_data['slug'], book_exchange.slug)
+        self.assertEqual(response_data['request_message'], book_exchange.request_message)
+        self.assertEqual(response_data['request_phone_number'], book_exchange.request_phone_number)
+        self.assertEqual(response_data['response_message'], book_exchange.response_message)
+        self.assertEqual(response_data['response_meeting_address'], book_exchange.response_meeting_address)
+        self.assertEqual(response_data['response_meeting_time'], book_exchange.response_meeting_time)
+        self.assertEqual(response_data['state'], 2)

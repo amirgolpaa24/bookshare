@@ -77,7 +77,7 @@ class BorrowedBookPropertiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookExchange
         fields = [  'book', 'borrower', 'lender', 
-                    'slug', 
+                    'slug', 'state', 
                     'when_requested', 'when_started',
                     'request_message', 'request_phone_number',  
                     'response_message', 'response_meeting_address', 'response_meeting_time',  ]
