@@ -192,8 +192,6 @@ class AddBookBorrowResponseAPITestCase(APITestCase):
         self.assertEqual(book_exchange.state, 2)
        
 
-     
-
 class GetUserBorrowListAPITestCase(APITestCase):
 
     urls = 'sharing.api.urls'

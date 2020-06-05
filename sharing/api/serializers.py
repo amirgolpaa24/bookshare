@@ -83,4 +83,3 @@ class BorrowedBookPropertiesSerializer(serializers.ModelSerializer):
                     'response_message', 'response_meeting_address', 'response_meeting_time',  ]
 
 
-
