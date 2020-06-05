@@ -87,9 +87,6 @@ class Book(models.Model):
         self.save()
         return self.slug
 
-    def check_slug(self, slug):
-        return not(self.slug) and slug == self.slug
-
     def save(self, *args, **kwargs):
         self.date_added = timezone.now()
 

@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+import sharing
 
 
 class UserManager(BaseUserManager):
@@ -117,11 +118,59 @@ class User(AbstractBaseUser):
                 "authors": book.authors_list,
                 "categories": book.categories_list,
             } 
-            for book in self.book_set.all()]
+            for book in self.book_set.all()
+        ]
 
     @property
     def books_count(self):
         return len(self.books_list)
+
+    @property
+    def borrow_list(self):
+        """ returns a list of all BookExchanges that this user is their borrower """
+        return [
+            {
+                "slug": book_exchange.slug,
+                "book_slug": book_exchange.book.slug,
+                "book_title": book_exchange.book_title,
+                "borrower_username": book_exchange.borrower_username,
+                "lender_username": book_exchange.lender_username,
+                "state": book_exchange.state,
+                "when_requested": book_exchange.when_requested,
+                "when_started": book_exchange.when_started,
+                "when_ended": book_exchange.when_ended,
+            } 
+            for book_exchange in sharing.models.BookExchange.objects.filter(borrower=self)
+        ]
+
+    @property
+    def borrow_list_to_show(self):
+        states_to_show = [0, 1, 2]
+        return [exchange_dict for exchange_dict in self.borrow_list if exchange_dict['state'] in states_to_show]
+
+    @property
+    def lend_list(self):
+        """ returns a list of all BookExchanges that this user is their lender """
+        return [
+            {
+                "slug": book_exchange.slug,
+                "book_slug": book_exchange.book.slug,
+                "book_title": book_exchange.book_title,
+                "borrower_username": book_exchange.borrower_username,
+                "lender_username": book_exchange.lender_username,
+                "state": book_exchange.state,
+                "when_requested": book_exchange.when_requested,
+                "when_started": book_exchange.when_started,
+                "when_ended": book_exchange.when_ended,
+            } 
+            for book_exchange in sharing.models.BookExchange.objects.filter(lender=self)
+        ]
+
+    @property
+    def lend_list_to_show(self):
+        states_to_show = [0, 2]
+        return [exchange_dict for exchange_dict in self.lend_list if exchange_dict['state'] in states_to_show]
+
 
     @property
     def full_name(self):

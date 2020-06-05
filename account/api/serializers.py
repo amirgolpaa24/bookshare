@@ -7,13 +7,14 @@ class SelfUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [  'first_name', 'last_name', 'username', 'email', 'image', 
-                    'books_count', 'rating', 'books_list', ]
+                    'books_count', 'rating', 'books_list', 
+                    'borrow_list_to_show', 'lend_list_to_show', ]
 
     
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [  'first_name', 'last_name', 'username', 'email', 'image', 
+        fields = [  'first_name', 'last_name', 'username', 'image', 
                     'books_count', 'rating', 'books_list']
 
 
