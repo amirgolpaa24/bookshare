@@ -33,19 +33,12 @@ import json
 
 # messages:
 MSG_NO_RESPONSE_RESULT =        {'Persian': 'نتیجه پاسخ ارائه نشده است', 'English': 'No response result was provided!'}[MSG_LANGUAGE]
-# MSG_NO_REQUEST_PHONE_NUMBER =   {'Persian': 'تعداد صفحات ارائه نشده است', 'English': 'No page number was provided!'}[MSG_LANGUAGE]
 
-# MSG_AUTHORS_NOTLIST =           {'Persian': 'لیستی از نویسنده ارائه نشده است', 'English': "No authors' list was provided!"}[MSG_LANGUAGE]
-# MSG_INVALID_AUTHORS =           {'Persian': 'نام نویسنده نامعتبر', 'English': 'invalid author name!'}[MSG_LANGUAGE]
+MSG_IMPOSSIBLE_BORROW =         {'Persian': 'قرض گرفتن این کتاب ممکن نمی باشد.', 'English': 'impossible borrowing!'}[MSG_LANGUAGE]
 MSG_INVALID_FIELDS =            {'Persian': 'ورودی (های) نامعتبر', 'English': 'invalid fields!'}[MSG_LANGUAGE]
 MSG_NONEXISTANT_BOOKEXCHANGE =  {'Persian': 'چنین مبادله کتابی وجود ندارد', 'English': 'There is no such book exchange!'}[MSG_LANGUAGE]
 MSG_UNEXPECTED_STATE =          {'Persian': 'حالت اشتراک کتاب در محدوده مورد نظر نیست', 'English': 'The exchange is not in the expected range!'}[MSG_LANGUAGE]
-# MSG_WRONG_USERNAME =            {'Persian': 'نام کاربری اشتباه است', 'English': 'The username is wrong!'}[MSG_LANGUAGE]
-# MSG_NONEXISTANT_BOOK =          {'Persian': 'چنین کتابی وجود ندارد', 'English': 'There is no such book!'}[MSG_LANGUAGE]
-# MSG_NOTYOURS_BOOK =             {'Persian': 'این کتاب متعلق به شما نیست', 'English': 'This book is not yours!'}[MSG_LANGUAGE]
 
-# MSG_EDIT_IMAGE_SUCCESS =        {'Persian': 'شما با موفقیت تصویر کتاب را تغییر دادید', 'English': 'You have successfully updated your book image.'}[MSG_LANGUAGE]
-# MSG_DELETE_BOOK_SUCCESS =       {'Persian': 'کتاب شما با موفقیت حذف شد', 'English': 'Your book was successfully deleted.'}[MSG_LANGUAGE]
 MSG_BORROW_REQUEST_SUCCESS =    {'Persian': 'درخواست قرض گرفتن کتاب با موفقیت ثبت شد', 'English': 'Your book borrow request was successfully registered.'}[MSG_LANGUAGE]
 MSG_REJECT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ رد با موفقیت ارسال شد', 'English': 'Your book reject response was successfully sent.'}[MSG_LANGUAGE]
 MSG_ACCEPT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ قبول با موفقیت ارسال شد', 'English': 'Your book accept response was successfully sent.'}[MSG_LANGUAGE]
@@ -67,6 +60,10 @@ def api_register_borrow_request_view(request, book_slug):
         book = Book.objects.get(slug=book_slug)
         borrower = request.user
         lender = book.owner
+
+        if lender == borrower:
+            response_data['message'] = MSG_IMPOSSIBLE_BORROW
+            return Response(response_data, status.HTTP_400_BAD_REQUEST)
 
         serializer_data = {
             "borrower": borrower.pk,
