@@ -203,6 +203,7 @@ def is_user_expired(user):
     return True
 
 
+# login
 class ObtainAuthTokenView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -232,6 +233,10 @@ class ObtainAuthTokenView(APIView):
             data['email'] = user.email
             data['first_name'] = user.first_name
             data['last_name'] = user.last_name
+            # books & borrow/lend lists:
+            data['books_list'] = user.books_list
+            data['borrow_list_to_show'] = user. borrow_list_to_show
+            data['lend_list_to_show'] = user. lend_list_to_show
             return Response(data, status=status.HTTP_200_OK)
         else:
             data['message'] = MSG_WRONG_USERNAMEPASSWORD
