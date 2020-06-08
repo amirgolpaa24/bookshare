@@ -40,6 +40,8 @@ MSG_NONEXISTANT_BOOKEXCHANGE =  {'Persian': 'چنین مبادله کتابی و
 MSG_UNEXPECTED_STATE =          {'Persian': 'حالت اشتراک کتاب در محدوده مورد نظر نیست', 'English': 'The exchange is not in the expected range!'}[MSG_LANGUAGE]
 
 MSG_BORROW_REQUEST_SUCCESS =    {'Persian': 'درخواست قرض گرفتن کتاب با موفقیت ثبت شد', 'English': 'Your book borrow request was successfully registered.'}[MSG_LANGUAGE]
+MSG_BORROW_RESPONSE_SUCCESS =    {'Persian': 'پاسخ شما به این درخواست با موفقیت ثبت شد', 'English': 'Your reponse to this request was successfully registered.'}[MSG_LANGUAGE]
+
 MSG_REJECT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ رد با موفقیت ارسال شد', 'English': 'Your book reject response was successfully sent.'}[MSG_LANGUAGE]
 MSG_ACCEPT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ قبول با موفقیت ارسال شد', 'English': 'Your book accept response was successfully sent.'}[MSG_LANGUAGE]
 
@@ -148,7 +150,7 @@ def api_add_borrow_response_view(request, exchange_slug):
             response_data['message'] = MSG_INVALID_FIELDS
             return Response(response_data, status.HTTP_400_BAD_REQUEST)
 
-        response_data['message'] = MSG_BORROW_REQUEST_SUCCESS
+        response_data['message'] = MSG_BORROW_RESPONSE_SUCCESS
         return Response(response_data, status=status.HTTP_200_OK)
 
 
