@@ -42,6 +42,9 @@ class BookRelatedField(serializers.RelatedField):
             'owner_name': obj.owner_name,
             'when_added': obj.when_added,
             'slug': obj.slug,
+            'rating': obj.rating,
+            'num_rates': obj.num_rates,
+            'num_borrowers': obj.num_borrowers,
         }
 
 
@@ -53,33 +56,29 @@ class UserRelatedField(serializers.RelatedField):
             'username': obj.username,
             'email': obj.email,
             'rating': obj.rating,
+            'num_rates': obj.num_rates,
+            'num_borrowers': obj.num_borrowers,
+            'num_lenders': obj.num_lenders
         }
 
 
-class BorrowRequestPropertiesSerializer(serializers.ModelSerializer):
+class ExchangePropertiesSerializer(serializers.ModelSerializer):
     book = BookRelatedField(read_only=True)
     borrower = UserRelatedField(read_only=True)
     lender = UserRelatedField(read_only=True)
     
+    response_meeting_time = serializers.ReadOnlyField()
+    return_meeting_time = serializers.ReadOnlyField()
+    book_comment = serializers.ReadOnlyField()
+    when_requested = serializers.ReadOnlyField()
+    when_started = serializers.ReadOnlyField()
+    when_rejected = serializers.ReadOnlyField()
+    when_delivered = serializers.ReadOnlyField()
+    when_ended = serializers.ReadOnlyField()
+    when_closed = serializers.ReadOnlyField()
+    when_last_changed = serializers.ReadOnlyField()
+
     class Meta:
         model = BookExchange
-        fields = [  'book', 'borrower', 'lender', 
-                    'slug', 'state', 
-                    'when_requested', 'when_ended', 
-                    'request_message', 'request_phone_number',  ]
-
-
-class BorrowedBookPropertiesSerializer(serializers.ModelSerializer):
-    book = BookRelatedField(read_only=True)
-    borrower = UserRelatedField(read_only=True)
-    lender = UserRelatedField(read_only=True)
-    
-    class Meta:
-        model = BookExchange
-        fields = [  'book', 'borrower', 'lender', 
-                    'slug', 'state', 
-                    'when_requested', 'when_started',
-                    'request_message', 'request_phone_number',  
-                    'response_message', 'response_meeting_address', 'response_meeting_time',  ]
-
+        fields = '__all__'
 

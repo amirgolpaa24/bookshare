@@ -1,3 +1,6 @@
+import json
+import os
+
 from django.contrib.auth import authenticate
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage, send_mail
@@ -5,14 +8,11 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes,
                                        permission_classes)
-
-from rest_framework import viewsets
-
 from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,22 +20,23 @@ from rest_framework.views import APIView
 
 from account.models import User
 from book.models import Book
+from bookshare.settings import DEFAULT_BOOK_IMAGE, MEDIA_ROOT, MSG_LANGUAGE
 from sharing.models import BookExchange
 
-from bookshare.settings import (MSG_LANGUAGE, MEDIA_ROOT, DEFAULT_BOOK_IMAGE)
-
-from .serializers import (  BookExchangeRegistrationSerializer, BookExchangeBorrowRequestSerializer, 
-                            UserBorrowListSerializer, UserLendListSerializer, 
-                            BorrowRequestPropertiesSerializer, BorrowedBookPropertiesSerializer, )
-import os
-import json
-
+from .serializers import (BookExchangeBorrowRequestSerializer,
+                          BookExchangeRegistrationSerializer,
+                          ExchangePropertiesSerializer,
+                          UserBorrowListSerializer, UserLendListSerializer)
 
 # messages:
 MSG_NO_RESPONSE_RESULT =        {'Persian': 'نتیجه پاسخ ارائه نشده است', 'English': 'No response result was provided!'}[MSG_LANGUAGE]
 
-MSG_IMPOSSIBLE_BORROW =         {'Persian': 'قرض گرفتن این کتاب ممکن نمی باشد.', 'English': 'impossible borrowing!'}[MSG_LANGUAGE]
+MSG_IMPOSSIBLE_BORROW =         {'Persian': 'قرض گرفتن این کتاب ممکن نمی باشد', 'English': 'impossible borrowing!'}[MSG_LANGUAGE]
+MSG_BOOK_UNAVAILABLE =          {'Persian': 'این کتاب در حال حاضر در دسترس نمی باشد', 'English': 'This book is unavailable!'}[MSG_LANGUAGE]
+
 MSG_INVALID_FIELDS =            {'Persian': 'ورودی (های) نامعتبر', 'English': 'invalid fields!'}[MSG_LANGUAGE]
+MSG_INVALID_STATE =             {'Persian': 'کتاب در وضعیت نامعتبر', 'English': 'invalid state!'}[MSG_LANGUAGE]
+
 MSG_NONEXISTANT_BOOKEXCHANGE =  {'Persian': 'چنین مبادله کتابی وجود ندارد', 'English': 'There is no such book exchange!'}[MSG_LANGUAGE]
 MSG_UNEXPECTED_STATE =          {'Persian': 'حالت اشتراک کتاب در محدوده مورد نظر نیست', 'English': 'The exchange is not in the expected range!'}[MSG_LANGUAGE]
 
@@ -44,6 +45,10 @@ MSG_BORROW_RESPONSE_SUCCESS =    {'Persian': 'پاسخ شما به این درخ
 
 MSG_REJECT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ رد با موفقیت ارسال شد', 'English': 'Your book reject response was successfully sent.'}[MSG_LANGUAGE]
 MSG_ACCEPT_RESPONSE_SUCCESS =   {'Persian': 'پاسخ قبول با موفقیت ارسال شد', 'English': 'Your book accept response was successfully sent.'}[MSG_LANGUAGE]
+MSG_BOOK_DELIVERY_SUCCESS =     {'Persian': 'کتاب با موفقیت تحویل داده شد', 'English': 'Your book was delivered successfully sent.'}[MSG_LANGUAGE]
+MSG_BOOK_RETURN_SUCCESS =       {'Persian': 'کتاب با موفقیت بازگردانده شد', 'English': 'Your book was returned successfully.'}[MSG_LANGUAGE]
+MSG_BORROWER_RATING_SUCCESS =   {'Persian': 'ارزیابی شما از قرض گیرنده با موفقیت ثبت شد', 'English': 'Your rating for borrower was successfully sent.'}[MSG_LANGUAGE]
+
 
 ########################################################################################################################################
 
@@ -65,6 +70,10 @@ def api_register_borrow_request_view(request, book_slug):
 
         if lender == borrower:
             response_data['message'] = MSG_IMPOSSIBLE_BORROW
+            return Response(response_data, status.HTTP_400_BAD_REQUEST)
+        # if this book is in an active exchange:
+        if BookExchange.objects.filter(book=book, state__in=[0, 2, 3]).exists():
+            response_data['message'] = MSG_BOOK_UNAVAILABLE
             return Response(response_data, status.HTTP_400_BAD_REQUEST)
 
         serializer_data = {
@@ -146,8 +155,11 @@ def api_add_borrow_response_view(request, exchange_slug):
         )
         
         if accept_result != True:
-            response_data = accept_result
-            response_data['message'] = MSG_INVALID_FIELDS
+            if isinstance(accept_result, bool):
+                response_data['message'] = MSG_INVALID_STATE
+            else:
+                response_data = accept_result
+                response_data['message'] = MSG_INVALID_FIELDS
             return Response(response_data, status.HTTP_400_BAD_REQUEST)
 
         response_data['message'] = MSG_BORROW_RESPONSE_SUCCESS
@@ -202,19 +214,128 @@ def api_get_exchange_properties_view(request, exchange_slug):
             response_data['message'] = MSG_NONEXISTANT_BOOKEXCHANGE
             return Response(data=response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        exchange_state = book_exchange.state
-        exchange_serializer = None
+        exchange_serializer = ExchangePropertiesSerializer(book_exchange)
 
-        if exchange_state == 0 or exchange_state == 1:
-            exchange_serializer = BorrowRequestPropertiesSerializer(book_exchange)
-        elif exchange_state == 2:
-            exchange_serializer = BorrowedBookPropertiesSerializer(book_exchange)
+        return Response(data=exchange_serializer.data, status=status.HTTP_200_OK)
 
-        if exchange_serializer is None:
-            response_data['message'] = MSG_UNEXPECTED_STATE
+
+@api_view(['PUT', ])
+@permission_classes([])
+@authentication_classes([TokenAuthentication])
+def api_deliver_book_to_borrower_view(request, exchange_slug):
+
+    if request.method == 'PUT': 
+        response_data = {}
+
+        user = request.user
+
+        try:
+            book_exchange = BookExchange.objects.get(slug=exchange_slug)
+            if book_exchange.lender != user:
+                raise BookExchange.DoesNotExist
+        except BookExchange.DoesNotExist:
+            response_data['message'] = MSG_NONEXISTANT_BOOKEXCHANGE
             return Response(data=response_data, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(data=exchange_serializer.data, status=status.HTTP_200_OK)
 
 
+        return_meeting_address = request.data.get('return_meeting_address', '')
+        return_meeting_year = request.data.get('return_meeting_year', '')
+        return_meeting_month = request.data.get('return_meeting_month', '')
+        return_meeting_day = request.data.get('return_meeting_day', '')
+        return_meeting_hour = request.data.get('return_meeting_hour', '')
+        return_meeting_minute = request.data.get('return_meeting_minute', '')
 
+        delivery_result = book_exchange.deliver(
+            meeting_address = return_meeting_address,
+            meeting_year = return_meeting_year,
+            meeting_month = return_meeting_month,
+            meeting_day = return_meeting_day,
+            meeting_hour = return_meeting_hour,
+            meeting_minute = return_meeting_minute,
+        )
+        
+        if delivery_result != True:
+            if isinstance(delivery_result, bool):
+                response_data['message'] = MSG_INVALID_STATE
+            else:
+                response_data = delivery_result
+                response_data['message'] = MSG_INVALID_FIELDS
+            return Response(response_data, status.HTTP_400_BAD_REQUEST)
+
+        response_data['message'] = MSG_BOOK_DELIVERY_SUCCESS
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', ])
+@permission_classes([])
+@authentication_classes([TokenAuthentication])
+def api_return_book_view(request, exchange_slug):
+
+    if request.method == 'PUT': 
+        response_data = {}
+
+        user = request.user
+
+        try:
+            book_exchange = BookExchange.objects.get(slug=exchange_slug)
+            if book_exchange.borrower != user:
+                raise BookExchange.DoesNotExist
+        except BookExchange.DoesNotExist:
+            response_data['message'] = MSG_NONEXISTANT_BOOKEXCHANGE
+            return Response(data=response_data, status=status.HTTP_400_BAD_REQUEST)
+
+
+        lender_rating = request.data.get('lender_rating', '')
+        book_rating = request.data.get('book_rating', '')
+        book_comment = request.data.get('book_comment', '')
+
+        end_result = book_exchange.end(
+            lender_rating = lender_rating,
+            book_rating = book_rating,
+            book_comment = book_comment
+        )
+        
+        if end_result != True:
+            if isinstance(end_result, bool):
+                response_data['message'] = MSG_INVALID_STATE
+            else:
+                response_data = end_result
+                response_data['message'] = MSG_INVALID_FIELDS
+            return Response(response_data, status.HTTP_400_BAD_REQUEST)
+
+        response_data['message'] = MSG_BOOK_RETURN_SUCCESS
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', ])
+@permission_classes([])
+@authentication_classes([TokenAuthentication])
+def api_rate_borrower_view(request, exchange_slug):
+
+    if request.method == 'PUT': 
+        response_data = {}
+
+        user = request.user
+
+        try:
+            book_exchange = BookExchange.objects.get(slug=exchange_slug)
+            if book_exchange.lender != user:
+                raise BookExchange.DoesNotExist
+        except BookExchange.DoesNotExist:
+            response_data['message'] = MSG_NONEXISTANT_BOOKEXCHANGE
+            return Response(data=response_data, status=status.HTTP_400_BAD_REQUEST)
+
+
+        borrower_rating = request.data.get('borrower_rating', '')
+        end_result = book_exchange.rate_borrower(borrower_rating = borrower_rating)
+        
+        if end_result != True:
+            if isinstance(end_result, bool):
+                response_data['message'] = MSG_INVALID_STATE
+            else:
+                response_data = end_result
+                response_data['message'] = MSG_INVALID_FIELDS
+            return Response(response_data, status.HTTP_400_BAD_REQUEST)
+
+        response_data['message'] = MSG_BORROWER_RATING_SUCCESS
+        return Response(response_data, status=status.HTTP_200_OK)

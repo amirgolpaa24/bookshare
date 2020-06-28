@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/account/', include('account.api.urls', 'account_api')),
     path('api/book/', include('book.api.urls', 'book_api')),
     path('api/sharing/', include('sharing.api.urls', 'sharing_api')),
+    path('api/search/', include('search.api.urls', 'search_api')),
 ]

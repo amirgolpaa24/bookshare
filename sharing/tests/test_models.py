@@ -35,7 +35,7 @@ class BookExchangeTestCase(TestCase):
     def test_slug_and_state_and_str(self):
         test_book_exchange = self.test_book_exchange
 
-        self.assertEqual(test_book_exchange.slug.split('x')[1], str(test_book_exchange.pk))
+        self.assertEqual(test_book_exchange.slug.split('x')[1], str(test_book_exchange.pk).split('x')[1])
         self.assertEqual(test_book_exchange.state, 0)
     
     def test_borrower_and_book_and_lender_str(self):

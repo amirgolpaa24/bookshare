@@ -2,12 +2,10 @@ from datetime import timedelta
 from uuid import uuid4
 
 from django.core.exceptions import ValidationError
-
-from django.core.validators import RegexValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 from django.utils import timezone
-
-# from sharing.api.serializers import BookExchangeBorrowRequestSerializer
 
 from account.models import User
 from book.models import Book
@@ -44,25 +42,28 @@ BOOK_EXCHANGE_STATES = (
     (0, 'Requested'),
     (1, 'Rejected'),
     (2, 'Started'),
-    (3, 'Ended'),
-    (4, 'Overdue'),
+    (3, 'Delivered'),
+    (4, 'Ended'),
+    (5, 'Closed'),
+    (6, 'Overdue'),
 )
 
 
 class BookExchange(models.Model): 
     # notice: each book can currently be in only one exchange
-    book =                      models.OneToOneField(Book, on_delete=models.CASCADE, primary_key=True)
+    book =                      models.ForeignKey(Book, on_delete=models.CASCADE)
     borrower =                  models.ForeignKey(User, on_delete=models.CASCADE, related_name='borrow_exchange')
     lender =                    models.ForeignKey(User, on_delete=models.CASCADE, related_name='lend_exchange', null=True)
-
-    slug =                      models.CharField(max_length=30, unique=True)
-
+    slug =                      models.CharField(max_length=30, primary_key=True)
     state =                     models.IntegerField(choices=BOOK_EXCHANGE_STATES, default=0)
 
     date_requested =            models.DateTimeField(verbose_name='date requested', default=timezone.now)
     date_started =              models.DateTimeField(verbose_name='date started', default=timezone.now)
+    date_delivered =            models.DateTimeField(verbose_name='date delivered', default=timezone.now)
     date_ended =                models.DateTimeField(verbose_name='date ended', default=timezone.now)
-
+    date_closed =               models.DateTimeField(verbose_name='date closed', default=timezone.now)
+    # for sorting according to the time of last change:
+    date_last_changed =         models.DateTimeField(verbose_name='date last changed', default=timezone.now)
 
     # fields that the BORROWER sets while requesting:
     request_message =           models.CharField(max_length=200, blank=True)
@@ -80,6 +81,19 @@ class BookExchange(models.Model):
     response_meeting_hour =     models.CharField(max_length=2, blank=True)
     response_meeting_minute =   models.CharField(max_length=2, blank=True)
 
+    # fields that the LENDER sets while delivering the book:
+    return_meeting_address =    models.CharField(max_length=150, blank=True)
+    # meeting time:
+    return_meeting_year =       models.CharField(max_length=4, blank=True)
+    return_meeting_month =      models.CharField(max_length=10, blank=True)
+    return_meeting_day =        models.CharField(max_length=2, blank=True)
+    return_meeting_hour =       models.CharField(max_length=2, blank=True)
+    return_meeting_minute =     models.CharField(max_length=2, blank=True)
+
+    # fields related to returning and rating:
+    lender_rating =             models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(10)])
+    book_rating =               models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    borrower_rating =           models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(10)])
 
     @property
     def response_meeting_time(self):
@@ -88,62 +102,67 @@ class BookExchange(models.Model):
                 self.response_meeting_day + ' at ' +\
                 self.response_meeting_hour + ':' +\
                 self.response_meeting_minute
-
     @property
-    def get_lender(self):
-        return self.book.lender
+    def return_meeting_time(self):
+        return  self.return_meeting_year + '/' +\
+                self.return_meeting_month + '/' +\
+                self.return_meeting_day + ' at ' +\
+                self.return_meeting_hour + ':' +\
+                self.return_meeting_minute
+    @property
+    def book_comment(self):
+        try:
+            return Comment.objects.get(book_exchange=self).text
+        except Comment.DoesNotExist:
+            return None
 
     @property
     def when_requested(self):
         return calculate_duration(self.date_requested, timezone.now())
-
     @property
     def when_started(self):
         return calculate_duration(self.date_started, timezone.now())
-
+    @property
+    def when_rejected(self):
+        return calculate_duration(self.date_rejected, timezone.now())
+    @property
+    def when_delivered(self):
+        return calculate_duration(self.date_delivered, timezone.now())
     @property
     def when_ended(self):
         return calculate_duration(self.date_ended, timezone.now())
-
+    @property
+    def when_closed(self):
+        return calculate_duration(self.date_closed, timezone.now())
+    @property
+    def when_last_changed(self):
+        return calculate_duration(self.date_last_changed, timezone.now())
+    
     @property
     def borrower_username(self):
         return self.borrower.username
-
     @property
     def lender_username(self):
         return self.lender.username
-
     @property
     def book_title(self):
         return self.book.title
 
-
-    def generate_unique_slug(self):
-        if not self.slug:
-            self.slug = uuid4().hex[22:] + "x" + str(self.pk)
-        self.save()
-        return self.slug
-
-    def save(self, *args, **kwargs):
-        super(BookExchange, self).save(*args, **kwargs)
-
-        self.lender = self.book.owner
-
-        if not(self.slug):
-            self.generate_unique_slug()
-
-
     @property
-    def is_started(self):
-        return self.state == 2
-    
+    def is_requested(self):
+        return self.state == 0
     @property
     def is_rejected(self):
         return self.state == 1
-    
+    @property
+    def is_started(self):
+        return self.state == 2
+    @property
+    def is_delivered(self):
+        return self.state == 3
     @property
     def is_ended(self):
-        return self.state == 3
+        return self.state == 4
 
 
     # when the borrower sends a borrow request
@@ -152,10 +171,9 @@ class BookExchange(models.Model):
         # it returns the result: success or not
         if self.state == 0:
             self.date_requested = timezone.now()
-
+            self.sorted_date = self.date_requested
             self.request_email = self.borrower.email
-            self.save()
-
+            
             self.request_message = request_message
             self.request_phone_number = phone_number
             try:
@@ -172,13 +190,12 @@ class BookExchange(models.Model):
     ### then HIS EMAIL WILL BE SEEN by the borrower/requester of the book
     def accept(self, response_message, meeting_address, meeting_year, meeting_month, meeting_day, meeting_hour, meeting_minute):
         # it returns the result: success or not
-        if self.state == 0:
+        if self.is_requested:
             self.state = 2
             self.date_started = timezone.now()
-
+            self.sorted_date = self.date_started
             self.response_email = self.lender.email
-            self.save()
-
+            
             self.response_message = response_message
             self.response_meeting_address = meeting_address
             self.response_meeting_year = meeting_year
@@ -199,9 +216,10 @@ class BookExchange(models.Model):
     # when the lender rejects the request
     def reject(self):
         # it returns the result: success or not
-        if self.state == 0:
+        if self.is_requested:
             self.state = 1
-            self.date_ended = timezone.now()
+            self.date_rejected = timezone.now()
+            self.sorted_date = self.date_rejected
 
             self.save()
             
@@ -209,19 +227,143 @@ class BookExchange(models.Model):
         else:
             return False
         
-    # when the borrower returns the book to the lender (its owner)
-    def end(self):
+    # when the lender delivers the book to the borrower
+    def deliver(self, meeting_address, meeting_year, meeting_month, meeting_day, meeting_hour, meeting_minute):
         # it returns the result: success or not
-        if self.state == 2:
+        if self.is_started: 
             self.state = 3
-            self.date_ended = timezone.now()
+            self.date_delivered = timezone.now()
+            self.sorted_date = self.date_delivered
 
-            self.save()
+            self.book.num_borrowers += 1
+            self.lender.num_borrowers += 1
+            self.borrower.num_lenders += 1
+
+            self.return_meeting_address = meeting_address
+            self.return_meeting_year = meeting_year
+            self.return_meeting_month = meeting_month
+            self.return_meeting_day = meeting_day
+            self.return_meeting_hour = meeting_hour
+            self.return_meeting_minute = meeting_minute.zfill(2)
+            try:
+                self.book.clean_fields(exclude=['edition', 'pub_year', 'category_1', 'image'])
+                self.lender.clean_fields(exclude=['first_name', 'last_name', 'password', 'username', 'image', 'last_retrieval'])
+                self.borrower.clean_fields(exclude=['first_name', 'last_name', 'password', 'username', 'image', 'last_retrieval'])
+                self.clean_fields()
+                self.book.save()
+                self.lender.save()
+                self.borrower.save()
+                self.save()
+            except ValidationError as ve:
+                return {k:list(map(str, ve.error_dict[k][0])) for k in ve.error_dict}
+
+            return True
+        else:
+            return False
+
+    # when the borrower returns the book to the lender (its owner)
+    def end(self, lender_rating: int, book_rating: int, book_comment=""):
+        # it returns the result: success or not
+        if self.is_delivered or self.is_ended:
+            self.state += 1
+            self.date_ended = timezone.now()
+            self.sorted_date = self.date_ended
+
+            self.lender_rating = lender_rating
+            self.book_rating = book_rating
+
+            self.lender.num_rates += 1
+            self.book.num_rates += 1
+            self.lender.rating = ((self.lender.rating * (self.lender.num_rates - 1)) + lender_rating) / self.lender.num_rates
+            self.book.rating = ((self.book.rating * (self.book.num_rates - 1)) + book_rating) / self.book.num_rates
+            if book_comment:
+                new_comment = Comment(book_exchange=self, text=book_comment)
+            try:
+                self.clean_fields()
+                self.lender.clean_fields(exclude=['first_name', 'last_name', 'password', 'username', 'image', 'last_retrieval'])
+                self.book.clean_fields(exclude=['edition', 'pub_year', 'category_1', 'image'])
+                if book_comment:
+                    new_comment.clean_fields()
+
+                self.save()
+                self.lender.save()
+                self.book.save()
+                if book_comment:
+                    new_comment.save()
+            except ValidationError as ve:
+                return {k:list(map(str, ve.error_dict[k][0])) for k in ve.error_dict}
+
+            return True
+        else:
+            return False
+
+    # when the lender rates the borrower:
+    def rate_borrower(self, borrower_rating: int):
+        # it returns the result: success or not
+        if self.is_delivered or self.is_ended: 
+            self.state += 1
+            self.date_closed = timezone.now()
+            self.sorted_date = self.date_closed
+
+            self.borrower_rating = borrower_rating
+
+            self.borrower.num_rates += 1
+            self.borrower.rating = ((self.borrower.rating * (self.borrower.num_rates - 1)) + borrower_rating) / self.borrower.num_rates
+            try:
+                self.borrower.clean_fields(exclude=['first_name', 'last_name', 'password', 'username', 'image', 'last_retrieval'])
+                self.clean_fields()
+                self.borrower.save()
+                self.save()
+            except ValidationError as ve:
+                return {k:list(map(str, ve.error_dict[k][0])) for k in ve.error_dict}
 
             return True
         else:
             return False
 
 
+    def generate_unique_slug(self):
+        if not self.slug:
+            new_slug = uuid4().hex[22:] + "x" + uuid4().hex[23:]
+            while BookExchange.objects.filter(slug=new_slug).exists():
+                new_slug = uuid4().hex[22:] + "x" + uuid4().hex[23:]
+            self.slug = new_slug
+            return new_slug
+
+    def save(self, *args, **kwargs):
+        is_first_time = not(self.slug)
+        if is_first_time:
+            self.generate_unique_slug()
+
+        super(BookExchange, self).save(*args, **kwargs)
+
+        if is_first_time:
+            self.lender = self.book.owner
+            self.save()
+
     def __str__(self):
         return self.book_title + " - BORROWED BY: " + self.borrower_username + " - FROM: " + self.lender_username
+
+
+class Comment(models.Model):
+    book_exchange = models.ForeignKey(BookExchange, on_delete=models.CASCADE)
+    date_written =  models.DateTimeField(verbose_name='date written', default=timezone.now)
+
+    text =          models.CharField(max_length=150)
+
+    @property
+    def writer_name():
+        return self.writer.full_name
+
+    def __str__(self):
+        res = self.writer_name + ": "
+        if len(self.text) > 40:
+            res += self.text[:40] + "..."
+        else:
+            res += self.text
+        return res
+
+    def save(self, *args, **kwargs):
+        self.date_written = timezone.now()
+
+        super(Comment, self).save(*args, **kwargs)

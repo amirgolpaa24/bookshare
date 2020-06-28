@@ -123,7 +123,8 @@ def api_add_book_view(request):
                 new_book.delete()
                 return Response(data, status.HTTP_400_BAD_REQUEST)
 
-            for author_i_serializer in author_serializers:
+            for i, author_i_serializer in enumerate(author_serializers):
+                new_book.add_author(author_names[i])
                 author_i_serializer.save()
 
             data['message'] = MSG_ADD_BOOK_SUCCESS

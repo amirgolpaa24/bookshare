@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -79,7 +79,12 @@ class User(AbstractBaseUser):
     email =             models.EmailField(max_length=254, unique=True, blank=False, null=False)
 
     image =             models.ImageField(upload_to=create_profile_image_upload_path, blank=False, null=True)
-    rating =            models.FloatField(default=0.0)
+    
+    # user rating:
+    rating =            models.FloatField(default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+    num_rates =         models.IntegerField(default=0)
+    num_borrowers =     models.IntegerField(default=0)
+    num_lenders =       models.IntegerField(default=0)
 
     date_joined =       models.DateTimeField(verbose_name='date joined', auto_now_add=True, editable=False)
     last_login =        models.DateTimeField(verbose_name='last login', auto_now=True, editable=False)
@@ -136,6 +141,8 @@ class User(AbstractBaseUser):
                 "borrower_username": book_exchange.borrower_username,
                 "lender_username": book_exchange.lender_username,
                 "state": book_exchange.state,
+                "date_last_changed": book_exchange.date_last_changed,
+                "when_last_changed": book_exchange.when_last_changed,
                 "when_requested": book_exchange.when_requested,
                 "when_started": book_exchange.when_started,
                 "when_ended": book_exchange.when_ended,
@@ -145,8 +152,9 @@ class User(AbstractBaseUser):
 
     @property
     def borrow_list_to_show(self):
-        states_to_show = [0, 1, 2]
-        return [exchange_dict for exchange_dict in self.borrow_list if exchange_dict['state'] in states_to_show]
+        # the list is sorted here: 
+        #       first by "time" (newest/largest first), then by "state" (least first)
+        return sorted(self.borrow_list, key=lambda d: (d["date_last_changed"], -d["state"]), reverse=True)
 
     @property
     def lend_list(self):
@@ -159,6 +167,8 @@ class User(AbstractBaseUser):
                 "borrower_username": book_exchange.borrower_username,
                 "lender_username": book_exchange.lender_username,
                 "state": book_exchange.state,
+                "date_last_changed": book_exchange.date_last_changed,
+                "when_last_changed": book_exchange.when_last_changed,
                 "when_requested": book_exchange.when_requested,
                 "when_started": book_exchange.when_started,
                 "when_ended": book_exchange.when_ended,
@@ -168,8 +178,9 @@ class User(AbstractBaseUser):
 
     @property
     def lend_list_to_show(self):
-        states_to_show = [0, 2]
-        return [exchange_dict for exchange_dict in self.lend_list if exchange_dict['state'] in states_to_show]
+        # the list is sorted here: 
+        #       first by "time" (newest/largest first), then by "state" (least first)
+        return sorted(self.lend_list, key=lambda d: (d["date_last_changed"], -d["state"]), reverse=True)
 
 
     @property

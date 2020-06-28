@@ -1,5 +1,6 @@
 from django.db import models
 
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from uuid import uuid4
 import os
@@ -17,18 +18,23 @@ def create_book_image_upload_path(instance, filename):
 
 
 class Book(models.Model): 
-    title =             models.CharField(max_length=40, blank=False, default=None)
-    description =       models.CharField(max_length=200, blank=False, default=None)
+    title =             models.CharField(max_length=60, blank=False, default=None)
+    description =       models.CharField(max_length=400, blank=False, default=None)
     page_num =          models.IntegerField()
 
     edition =           models.IntegerField(null=True)
-    publisher =         models.CharField(max_length=30, blank=True)
+    publisher =         models.CharField(max_length=50, blank=True)
     pub_year =          models.IntegerField(null=True)
     
     date_added =        models.DateTimeField(verbose_name='date added', default=timezone.now)
 
     owner =             models.ForeignKey(User, on_delete=models.CASCADE)
     slug =              models.CharField(max_length=30, unique=True)
+
+    # book rating:
+    rating =            models.FloatField(default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
+    num_rates =         models.IntegerField(default=0)
+    num_borrowers =     models.IntegerField(default=0)
 
     # There are 32 categories:
     Category_Choice =   [
@@ -46,7 +52,8 @@ class Book(models.Model):
     category_3 =        models.CharField(max_length=30, choices=Category_Choice, blank=True)
 
     image =             models.ImageField(upload_to=create_book_image_upload_path, blank=False, null=True)
-
+    
+    authors_str =       models.CharField(max_length=250, blank=True, default="")
 
     @property
     def when_added(self):
@@ -96,7 +103,15 @@ class Book(models.Model):
             self.generate_unique_slug()
 
     def add_author(self, author_name):
-        new_author = Author.objects.create(name=author_name, book=self)
+        # new_author = Author.objects.create(name=author_name, book=self)
+        if self.authors_str == "":
+            self.authors_str = author_name
+            self.save()
+        elif len(self.authors_str) + len(author_name) <= 249:
+            updated_authors_str = self.authors_str + " " + author_name
+            self.authors_str = updated_authors_str
+            self.save()
+
 
     def __str__(self):
         return self.title + " - OWNED BY: " + self.owner_name
@@ -108,3 +123,4 @@ class Author(models.Model):
 
     def __str__(self):
         return self.name
+
