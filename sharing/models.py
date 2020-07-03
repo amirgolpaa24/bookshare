@@ -95,6 +95,9 @@ class BookExchange(models.Model):
     book_rating =               models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     borrower_rating =           models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(10)])
 
+    has_lender_rated =          models.BooleanField(default=False)
+    has_borrower_rated =        models.BooleanField(default=False)
+
     @property
     def response_meeting_time(self):
         return  self.response_meeting_year + '/' +\
@@ -271,6 +274,7 @@ class BookExchange(models.Model):
 
             self.lender_rating = lender_rating
             self.book_rating = book_rating
+            self.has_borrower_rated = True
 
             self.lender.num_rates += 1
             self.book.num_rates += 1
@@ -306,6 +310,7 @@ class BookExchange(models.Model):
             self.sorted_date = self.date_closed
 
             self.borrower_rating = borrower_rating
+            self.has_lender_rated = True
 
             self.borrower.num_rates += 1
             self.borrower.rating = ((self.borrower.rating * (self.borrower.num_rates - 1)) + borrower_rating) / self.borrower.num_rates
