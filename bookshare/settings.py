@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'account',
     'book',
-    # 'sharing',
+    'sharing',
     'search',
 ]
 
