@@ -136,16 +136,12 @@ class User(AbstractBaseUser):
         return [
             {
                 "slug": book_exchange.slug,
-                "book_slug": book_exchange.book.slug,
                 "book_title": book_exchange.book_title,
-                "borrower_username": book_exchange.borrower_username,
+                "lender_firstname": book_exchange.lender.first_name,
+                "lender_lastname": book_exchange.lender.last_name,
                 "lender_username": book_exchange.lender_username,
                 "state": book_exchange.state,
-                "date_last_changed": book_exchange.date_last_changed,
                 "when_last_changed": book_exchange.when_last_changed,
-                "when_requested": book_exchange.when_requested,
-                "when_started": book_exchange.when_started,
-                "when_ended": book_exchange.when_ended,
             } 
             for book_exchange in sharing.models.BookExchange.objects.filter(borrower=self)
         ]
@@ -162,16 +158,12 @@ class User(AbstractBaseUser):
         return [
             {
                 "slug": book_exchange.slug,
-                "book_slug": book_exchange.book.slug,
                 "book_title": book_exchange.book_title,
+                "borrower_firstname": book_exchange.borrower.first_name,
+                "borrower_lastname": book_exchange.borrower.last_name,
                 "borrower_username": book_exchange.borrower_username,
-                "lender_username": book_exchange.lender_username,
                 "state": book_exchange.state,
-                "date_last_changed": book_exchange.date_last_changed,
                 "when_last_changed": book_exchange.when_last_changed,
-                "when_requested": book_exchange.when_requested,
-                "when_started": book_exchange.when_started,
-                "when_ended": book_exchange.when_ended,
             } 
             for book_exchange in sharing.models.BookExchange.objects.filter(lender=self)
         ]
