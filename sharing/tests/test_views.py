@@ -239,7 +239,6 @@ class GetUserBorrowListAPITestCase(APITestCase):
 
         self.assertEqual(len(borrow_list), 3)
         self.assertEqual(set([borrow['lender_username'] for borrow in borrow_list]), set(['lender1', 'lender1', 'lender2']))
-        self.assertEqual(set([borrow['borrower_username'] for borrow in borrow_list]), set(['borrower', 'borrower', 'borrower']))
         self.assertEqual(set([borrow['book_title'] for borrow in borrow_list]), set(['test_title1', 'test_title2', 'test_title3']))
         self.assertEqual(set([borrow['state'] for borrow in borrow_list]), set([0, 0, 0]))
 
@@ -534,7 +533,6 @@ class GetUserLendListAPITestCase(APITestCase):
         lend_list = response.data.get('lend_list_to_show')
 
         self.assertEqual(len(lend_list), 3)
-        self.assertEqual(set([borrow['lender_username'] for borrow in lend_list]), set(['lender', 'lender', 'lender']))
         self.assertEqual(set([borrow['borrower_username'] for borrow in lend_list]), set(['borrower1', 'borrower2', 'borrower2']))
         self.assertEqual(set([borrow['book_title'] for borrow in lend_list]), set(['test_title1', 'test_title2', 'test_title3']))
         self.assertEqual(set([borrow['state'] for borrow in lend_list]), set([0, 0, 0]))

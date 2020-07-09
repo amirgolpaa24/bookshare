@@ -38,14 +38,6 @@ class BookTestCase(TestCase):
         self.assertGreaterEqual(now_time, test_book.date_added)
         self.assertLessEqual(now_time, test_book.date_added + timezone.timedelta(seconds=1))
 
-    def test_add_author(self):
-        test_book = Book.objects.create(title = "test_title", description="test_description", page_num=666, owner=User.objects.create(username="test_user"), category_1=Book.Category_Choice[0])
-        test_book.add_author("test_author")
-        
-        self.assertEquals(len(test_book.author_set.all()), 1)
-        self.assertEquals(test_book.author_set.all()[0].name, "test_author")
-        self.assertEquals(test_book.author_set.all()[0].book, test_book)
-    
     def test_categories(self):
         test_category_1 = Book.Category_Choice[0][0]
         test_book = Book.objects.create(title = "test_title", description="test_description", page_num=666, owner=User.objects.create(username="test_user"), category_1=test_category_1)

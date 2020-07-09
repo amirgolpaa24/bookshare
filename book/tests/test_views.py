@@ -169,12 +169,12 @@ class EditBookAPITestCase(APITestCase):
         }
 
         self.invalid_book_json = {
-            'title': 'a' * 41,
-            'description': 'a' * 201,
+            'title': 'a' * 61,
+            'description': 'a' * 401,
             'page_num': 'aaa',
             'category_1': 'aaa',
             'edition': 'aaa',
-            'publisher': 'a' * 31,
+            'publisher': 'a' * 51,
             'pub_year': 'aaa',
             'category_2': 'aaa',
             'category_3': 'aaa',

@@ -78,6 +78,18 @@ class Book(models.Model):
         for author in self.author_set.all():
             authors_list.append(author.name)
         return authors_list
+    
+    @property
+    def comments_list(self):
+        comments_list = self.comment_set.all()
+        comments_list.sort(key=lambda obj: obj.date_written)
+        return [
+            {
+                "text": comment.text,
+                "writer": comment.writer_name,
+            }
+            for comment in comments_list
+        ]
 
     @property
     def categories_list(self):

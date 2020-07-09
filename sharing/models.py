@@ -370,5 +370,6 @@ class Comment(models.Model):
 
     def save(self, *args, **kwargs):
         self.date_written = timezone.now()
+        self.book = self.book_exchange.book
 
         super(Comment, self).save(*args, **kwargs)

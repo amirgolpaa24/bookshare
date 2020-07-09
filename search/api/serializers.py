@@ -27,9 +27,6 @@ class BookListSerializer(serializers.ListSerializer):
 class BookResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = [  'title', 'description', 'page_num', 'edition', 'publisher', 
-                    'pub_year', 'authors_list', 'owner_name',
-                    'when_added', 'slug', 'rating', 'num_rates', 'num_borrowers', ]
         list_serializer_class = BookListSerializer
 
 
@@ -50,7 +47,5 @@ class UserListSerializer(serializers.ListSerializer):
 class UserResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [  'username', 'first_name', 'last_name', 
-                    'rating', 'num_rates', 'num_borrowers', 'num_lenders', ]
         list_serializer_class = UserListSerializer
 

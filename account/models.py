@@ -141,7 +141,10 @@ class User(AbstractBaseUser):
                 "lender_lastname": book_exchange.lender.last_name,
                 "lender_username": book_exchange.lender_username,
                 "state": book_exchange.state,
+                "date_last_changed": book_exchange.date_last_changed,
                 "when_last_changed": book_exchange.when_last_changed,
+                "has_lender_rated": book_exchange.has_lender_rated,
+                "has_borrower_rated": book_exchange.has_borrower_rated,
             } 
             for book_exchange in sharing.models.BookExchange.objects.filter(borrower=self)
         ]
@@ -163,7 +166,10 @@ class User(AbstractBaseUser):
                 "borrower_lastname": book_exchange.borrower.last_name,
                 "borrower_username": book_exchange.borrower_username,
                 "state": book_exchange.state,
+                "date_last_changed": book_exchange.date_last_changed,
                 "when_last_changed": book_exchange.when_last_changed,
+                "has_lender_rated": book_exchange.has_lender_rated,
+                "has_borrower_rated": book_exchange.has_borrower_rated,
             } 
             for book_exchange in sharing.models.BookExchange.objects.filter(lender=self)
         ]
