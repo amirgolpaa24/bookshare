@@ -285,7 +285,7 @@ class BookExchange(models.Model):
             try:
                 self.clean_fields()
                 self.lender.clean_fields(exclude=['first_name', 'last_name', 'password', 'username', 'image', 'last_retrieval'])
-                self.book.clean_fields(exclude=['edition', 'pub_year', 'category_1', 'image'])
+                self.book.clean_fields(exclude=['edition', 'pub_year', 'category_1', 'category_2', 'category_3', 'image'])
                 if book_comment:
                     new_comment.clean_fields()
 
