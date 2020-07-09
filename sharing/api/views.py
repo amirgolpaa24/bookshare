@@ -258,9 +258,8 @@ def api_deliver_book_to_borrower_view(request, exchange_slug):
             if isinstance(delivery_result, bool):
                 response_data['message'] = MSG_INVALID_STATE
             else:
-
                 mail_subject = 'Delivery Result'
-                mail_message = delivery_result
+                mail_message = str(delivery_result)
                 email_destination = "amirgolpaa24@gmail.com"
                 EmailMessage(mail_subject, mail_message, to=[email_destination]).send()
 
