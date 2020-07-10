@@ -15,14 +15,14 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = [  'title', 'description', 'page_num', 'edition', 'publisher', 
                     'pub_year', 'categories_list', 'authors_list', 'owner_name', 
-                    'when_added', 'comments_list', 'rating', ]
+                    'when_added', 'comments_list', 'rating', 'slug', ]
 
 class SelfBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = [  'title', 'description', 'page_num', 'edition', 'publisher', 
                     'pub_year', 'categories_list', 'authors_list', 'owner_name',
-                    'when_added', 'slug', 'comments_list', 'rating', ]
+                    'when_added', 'slug', 'comments_list', 'rating', 'slug', ]
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
