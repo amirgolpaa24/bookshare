@@ -23,7 +23,7 @@ from .serializers import BookResultSerializer, UserResultSerializer
 
 @api_view(['PUT', ])
 @permission_classes([])
-@authentication_classes([])
+@authentication_classes([TokenAuthentication])
 def api_search_book_view(request):
 
     if request.method == 'PUT':        
