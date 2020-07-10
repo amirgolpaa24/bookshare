@@ -363,7 +363,7 @@ class Comment(models.Model):
     text =          models.CharField(max_length=150)
 
     @property
-    def writer_name():
+    def writer_name(self):
         return self.writer.full_name
 
     def __str__(self):
