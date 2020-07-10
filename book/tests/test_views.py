@@ -479,8 +479,9 @@ class GetBookPropertiesAPITestCase(APITestCase):
                                          or field == 'owner_name' \
                                          or field == 'when_added':
                 continue
-            self.assertTrue(field in initial_book_json)
-            self.assertEqual(initial_book_json[field], response.data[field])
+            if field != 'slug':
+                self.assertTrue(field in initial_book_json)
+                self.assertEqual(initial_book_json[field], response.data[field])
         
         # owner_name field:
         self.assertEqual(response.data['owner_name'], owner.first_name + ' ' + owner.last_name)
