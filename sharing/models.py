@@ -364,7 +364,7 @@ class Comment(models.Model):
 
     @property
     def writer_name(self):
-        return self.writer.full_name
+        return self.book_exchange.borrower.full_name
 
     def __str__(self):
         res = self.writer_name + ": "
