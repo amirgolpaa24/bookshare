@@ -174,6 +174,7 @@ class BookExchange(models.Model):
         # it returns the result: success or not
         if self.state == 0:
             self.date_requested = timezone.now()
+            self.date_last_changed = self.date_requested
             self.sorted_date = self.date_requested
             self.request_email = self.borrower.email
             
@@ -196,6 +197,7 @@ class BookExchange(models.Model):
         if self.is_requested:
             self.state = 2
             self.date_started = timezone.now()
+            self.date_last_changed = self.date_started
             self.sorted_date = self.date_started
             self.response_email = self.lender.email
             
@@ -222,6 +224,7 @@ class BookExchange(models.Model):
         if self.is_requested:
             self.state = 1
             self.date_rejected = timezone.now()
+            self.date_last_changed = self.date_rejected
             self.sorted_date = self.date_rejected
 
             self.save()
@@ -236,6 +239,7 @@ class BookExchange(models.Model):
         if self.is_started: 
             self.state = 3
             self.date_delivered = timezone.now()
+            self.date_last_changed = self.date_delivered
             self.sorted_date = self.date_delivered
 
             self.book.num_borrowers += 1
@@ -270,6 +274,7 @@ class BookExchange(models.Model):
         if self.is_delivered or self.is_ended:
             self.state += 1
             self.date_ended = timezone.now()
+            self.date_last_changed = self.date_ended
             self.sorted_date = self.date_ended
 
             self.lender_rating = lender_rating
@@ -307,6 +312,7 @@ class BookExchange(models.Model):
         if self.is_delivered or self.is_ended: 
             self.state += 1
             self.date_closed = timezone.now()
+            self.date_last_changed = self.date_closed
             self.sorted_date = self.date_closed
 
             self.borrower_rating = borrower_rating
