@@ -90,7 +90,7 @@ def api_search_book_view(request):
         final_scores = [Book.objects.get(pk=b_pk) for b_pk in sorted(list(final_scores.keys()), key=lambda bpk: final_scores[bpk], reverse=True)]
         serializer = BookResultSerializer(final_scores, many=True)
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data={"result": serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT', ])
@@ -129,4 +129,4 @@ def api_search_user_view(request):
         scores = [User.objects.get(pk=u_pk) for u_pk in sorted(list(scores.keys()), key=lambda upk: scores[upk], reverse=True)]
         serializer = UserResultSerializer(scores, many=True)
 
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data={"result": serializer.data}, status=status.HTTP_200_OK)

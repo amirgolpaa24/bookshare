@@ -90,7 +90,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(response_data[i]["rating"], response_data[i + 1]["rating"])
 
@@ -117,7 +117,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(response_data[i]["title"].count("django"), response_data[i + 1]["title"].count("django"))
 
@@ -144,7 +144,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(response_data[i]["description"].count("django"), response_data[i + 1]["description"].count("django"))
 
@@ -171,7 +171,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(Book.objects.get(slug=response_data[i]["slug"]).authors_str.count("django"),
                             Book.objects.get(slug=response_data[i + 1]["slug"]).authors_str.count("django"))
@@ -199,7 +199,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(response_data[i]["publisher"].count("django"), response_data[i + 1]["publisher"].count("django"))
 
@@ -235,7 +235,7 @@ class SearchBookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         self.assertEqual(response_data[0]["title"].count("django"), 1)
         self.assertEqual(response_data[1]["description"].count("django"), 1)
         self.assertEqual(Book.objects.get(slug=response_data[2]["slug"]).authors_str.count("django"), 1)
@@ -304,7 +304,7 @@ class SearchUserAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         for i in range(len(response_data) - 1):
             self.assertGreaterEqual(response_data[i]["rating"], response_data[i + 1]["rating"])
 
@@ -325,7 +325,7 @@ class SearchUserAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         # checking rating-sorted list:
-        response_data = response.data
+        response_data = response.data["result"]
         self.assertEqual(response_data[0]["last_name"], "Gates")
         self.assertEqual(response_data[1]["last_name"], "Musk")
 
